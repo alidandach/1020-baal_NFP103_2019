@@ -1,4 +1,4 @@
-public class Client {
+public class Client implements Runnable{
     private String username;
     private String ip;
     private int port;
@@ -31,5 +31,9 @@ public class Client {
 
     public void setPort(int port) {
         this.port = port;
+    }
+
+    public void run() {
+
     }
 }

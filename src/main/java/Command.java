@@ -27,4 +27,14 @@ public enum Command {
     public String getDescription() {
         return description;
     }
+
+    public static Command getCommand(String command) {
+        Command[] commands = Command.values();
+        for (Command value : commands) {
+            if(value.getcommand().equals(command))
+                return value;
+        }
+        return null;
+    }
+
 }

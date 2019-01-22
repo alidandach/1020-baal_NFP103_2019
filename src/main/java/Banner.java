@@ -33,7 +33,7 @@ public class Banner {
     public static void adjustHelpMessage(String side) {
         String helpMessage = "\n";
         helpMessage += "Command \t Description \n";
-        helpMessage += "------- \t ----------- \n";
+        helpMessage += "------- \t ------------------------------------ \n";
         Command[] commands = Command.values();
         for (int i = 0; i < commands.length; i++)
             if (commands[i].getSide().equals(side) || commands[i].getSide().equals("both"))
