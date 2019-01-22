@@ -10,5 +10,5 @@
 
 
                          Talk IRC "WHATSUP lite"
-     author  : Ali Dandach
-     version : 1.0
+Author  : Ali Dandach
+Version : 1.0
