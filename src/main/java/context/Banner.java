@@ -1,7 +1,8 @@
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+package context;
+
+import command.Command;
+
+import java.io.*;
 
 /**
  * this class is non functionality it's just for organisation
@@ -13,14 +14,27 @@ public class Banner {
      * @throws IOException
      * @throws UnsupportedEncodingException
      */
-    public static void loadBanner() throws IOException, UnsupportedEncodingException {
-        String currentDirectory = new File("").getAbsoluteFile().getParent();
-        File file = new File(currentDirectory + "/1020-baal_NFP103_2019/src/main/java/banner.txt");
-        FileInputStream fis = new FileInputStream(file);
-        byte[] data = new byte[(int) file.length()];
-        fis.read(data);
-        fis.close();
-        String banner = new String(data, "UTF-8");
+    public static void loadBanner() {
+        InputStream fis =Banner.class.getClassLoader().getResourceAsStream("banner.txt");;
+        byte[] data = new byte[0];
+        try {
+            data = new byte[fis.available()];
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            fis.read(data);
+            fis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String banner = null;
+        try {
+            banner = new String(data, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         System.out.println(banner);
     }
 
@@ -37,7 +51,7 @@ public class Banner {
         Command[] commands = Command.values();
         for (int i = 0; i < commands.length; i++)
             if (commands[i].getSide().equals(side) || commands[i].getSide().equals("both"))
-                if (commands[i].getcommand().length() > 4)
+                if (commands[i].getcommand().length() > 6)
                     helpMessage += commands[i].getcommand() + " \t " + commands[i].getDescription() + " \n";
                 else
                     helpMessage += commands[i].getcommand() + " \t \t " + commands[i].getDescription() + " \n";

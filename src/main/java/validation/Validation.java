@@ -1,3 +1,6 @@
+package validation;
+
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public enum Validation {
@@ -5,7 +8,7 @@ public enum Validation {
 
     private final Pattern pattern;
 
-    private Validation(final String regex) {
+    Validation(String regex) {
         this.pattern = Pattern.compile(regex);
     }
 
