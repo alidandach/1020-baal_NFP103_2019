@@ -50,10 +50,8 @@ public class KeyBoardInput extends Thread {
                                 String host = command[1].substring(0, command[1].indexOf('@'));
                                 String ip = command[1].substring(command[1].indexOf('@') + 1, command[1].indexOf(':'));
                                 String port = command[1].substring(command[1].indexOf(':') + 1);
-                                System.out.println("command success");
                                 try {
                                     client.setSocket(new Socket(InetAddress.getByName(ip),Integer.parseInt(port)));
-                                    System.out.println("command success");
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }

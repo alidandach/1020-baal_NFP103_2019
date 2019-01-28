@@ -1,8 +1,9 @@
 package client;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class NetworkInput extends Thread {
     private Client client;
@@ -18,19 +19,34 @@ public class NetworkInput extends Thread {
 
     @Override
     public void run() {
-        while (!client.isShutdown()) {
-            Socket socket = null;
-            InputStream data = null;
-            try {
-                socket = client.getSocket();
-                data = socket.getInputStream();
-                String message = new String(data.readAllBytes());
-                System.out.println("from server" + message);
+        Socket socket =null;
+        Scanner networkInput=null;
+        PrintWriter networkOutput=null;
+        String message, response;
+        try {
+            socket = client.getSocket();
+            networkInput = new Scanner(socket.getInputStream());
+            networkOutput = new PrintWriter(socket.getOutputStream(), true);
+            message = "connect";
+            networkOutput.println(message);
 
-            } catch (IOException e) {
-                System.out.println("problem with server connection:" + e.getMessage());
-                System.exit(-1);
+            while(!client.isShutdown()) {
+                response = networkInput.nextLine();
+                System.out.println(response);
+            }
+
+        } catch (IOException e) {
+            System.out.println("problem with server connection:" + e.getMessage());
+            System.exit(-1);
+        } finally {
+            try {
+                System.out.println("\nClosing connection…");
+                socket.close();
+            } catch (IOException ioEx) {
+                System.out.println("Unable to disconnect!");
+                System.exit(1);
             }
         }
     }
 }
+

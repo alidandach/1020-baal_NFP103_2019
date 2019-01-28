@@ -28,25 +28,29 @@ public class Server {
 
     public String setPort(String p) {
         if (p == null)
-            return "port is null";
-        if (serverSocket != null)
-            return "server already start listening on port " + this.port;
-        try {
-            int port = Integer.parseInt(p);
-            if (port < 1024 || port > 65536)
-                return "please enter an integer between 1024> and <65536";
-            this.port = port;
+            return "null";
+        else if (serverSocket != null)
+            return "null";
+        if(p!=null && serverSocket==null) {
             try {
-                serverSocket = new ServerSocket(this.port, 50, InetAddress.getLocalHost());
-                networkInput = new NetworkInput("networkInput server", this);
-                networkInput.start();
-                return "server has started on port " + this.port;
-            } catch (IOException e) {
+                int port = Integer.parseInt(p);
+                if (port < 1024 || port > 65536)
+                   return "null";
+                this.port = port;
+                try {
+                    serverSocket = new ServerSocket(this.port, 50, InetAddress.getLocalHost());
+                    networkInput = new NetworkInput("networkInput server", this);
+                    networkInput.start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return e.getMessage();
+                }
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
                 return e.getMessage();
             }
-        } catch (NumberFormatException e) {
-            return "please enter an integer between 1024> and <65536";
         }
+        return "started";
     }
 
     public boolean isShutdown() {
