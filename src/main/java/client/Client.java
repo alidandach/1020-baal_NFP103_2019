@@ -1,16 +1,25 @@
 package client;
 
 import java.net.Socket;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 public class Client {
     private Socket socket;
-    private volatile boolean shutdown;
-    private KeyBoardInput keyBoardInput;
-    private NetworkInput networkInput;
+    private volatile boolean running;
+    private KeyBoard keyBoard;
+    private Network network;
+    private BlockingQueue<String> bridge;
 
     public Client() {
-        keyBoardInput = new KeyBoardInput("client keyboard", this);
-        keyBoardInput.start();
+        bridge = new ArrayBlockingQueue<>(1);
+        keyBoard = new KeyBoard("client keyboard", this);
+        keyBoard.start();
+        running = true;
+    }
+
+    public BlockingQueue<String> getBridge() {
+        return bridge;
     }
 
     public Socket getSocket() {
@@ -18,17 +27,19 @@ public class Client {
     }
 
     public void setSocket(Socket s) {
-        socket=s;
-        networkInput = new NetworkInput("client network", this);
-        networkInput.start();
+        socket = s;
+        network = new Network("client network", this);
+        network.start();
     }
 
-    public boolean isShutdown() {
-        return shutdown;
+    public boolean isRunning() {
+        return running;
     }
 
-    public void setShutdown() {
-        shutdown = true;
+    public void shutdown() {
+        network.interrupt();
+        keyBoard.interrupt();
+        running = false;
     }
 
     public String toString() {

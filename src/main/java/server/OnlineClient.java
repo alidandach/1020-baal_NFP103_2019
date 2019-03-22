@@ -1,43 +1,65 @@
 package server;
 
+import command.Command;
+
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 
 public class OnlineClient extends Thread {
-    private Socket broadcast;
-    private OutputStream output;
-    private InputStream input;
-    private String message;
+    private Server server;
+    private Socket socket;
+    private PrintWriter output;
+    private BufferedReader input;
 
-    public OnlineClient(Socket socket,String m) {
-        broadcast = socket;
-        message=m;
+    public OnlineClient(Server s, Socket socket) {
+        server = s;
+        this.socket = socket;
         try {
-            input = broadcast.getInputStream();
-            output = broadcast.getOutputStream();
+            input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            output = new PrintWriter(socket.getOutputStream(), true);
         } catch (IOException e) {
             System.out.println(e.getCause());
         }
     }
 
-    public void run () {
+    public void run() {
+        String request;
         try {
-            output.write(message.getBytes());
-            output.flush();
-            output.close();
 
-            if (broadcast!=null) {
-                broadcast.close();
+            while (true) {
+                // receive the command from client
+                request = input.readLine();
+
+                //parse command
+                Command cmd = Command.getCommand(request);
+
+                //handle command
+                switch (cmd) {
+                    case WHO:
+                        output.println(server.listAllClients());
+                        break;
+                }
+
+            }
+        } catch (IOException e) {
+            System.out.println("problem with client connection:" + e.getMessage());
+            Thread.currentThread().interrupt();
+        } finally {
+            try {
+                input.close();
+                output.close();
+                socket.close();
+            } catch (IOException e) {
+                System.out.println("problem when closing client connection:" + e.getMessage());
             }
         }
-        catch(IOException e){
-            System.out.println("OOps! Unable to disconnect!");
-        }
+
     }
 
-    public String toString(){
-        return broadcast.getInetAddress().toString();
+    public String toString() {
+        return socket.getLocalAddress().getHostName() + "\t\t\t" + socket.getLocalAddress().getHostAddress() + "\t\t\t" + socket.getPort();
     }
 }

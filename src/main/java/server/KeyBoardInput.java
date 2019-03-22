@@ -1,6 +1,6 @@
 package server;
 
-import command.ServerCommand;
+import command.Command;
 import context.Banner;
 
 import java.util.Scanner;
@@ -30,11 +30,17 @@ public class KeyBoardInput extends Thread {
         Banner.loadBanner();
         Banner.adjustHelpMessage("server");
         System.out.print("irc > ");
+
+
         String[] command = null;
-        ServerCommand cmd = null;
+        Command cmd = null;
+
+
         while (!server.isShutdown()) {
+
+
             command = input.nextLine().split(" ");
-            cmd = ServerCommand.getCommand(command[0]);
+            cmd = Command.getCommand(command[0]);
 
             if (cmd != null) {
                 switch (cmd) {

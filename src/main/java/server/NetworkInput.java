@@ -1,9 +1,12 @@
 package server;
 
+import command.Command;
+
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Scanner;
 
 public class NetworkInput extends Thread {
     private Server server;
@@ -24,44 +27,50 @@ public class NetworkInput extends Thread {
 
     @Override
     public void run() {
-        Socket socket =null;
-        Scanner networkInput=null;
-        PrintWriter networkOutput=null;
-        String message, response;
+        Socket socket = null;
+        PrintWriter output = null;
+        BufferedReader input = null;
+        String request;
         try {
-            socket = server.getServerSocket().accept();
-            networkInput = new Scanner(socket.getInputStream());
-            networkOutput = new PrintWriter(socket.getOutputStream(), true);
 
             while (!server.isShutdown()) {
-                response = networkInput.nextLine();
-                //Display server's response to user…
-                System.out.println("\nSERVER> " + response);
+                //waite for new client
+                socket = server.getServerSocket().accept();
+                input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                request = input.readLine();
 
+                //parse command
+                Command cmd = Command.getCommand(request);
 
-                switch (response) {
-                    case "connect":
-                        OnlineClient c = new OnlineClient(socket, "connected !");
-                        server.addClient(c);
-                        System.out.println("new client is connected.check it by typing who command");
-                        System.out.print("irc > ");
-                        break;
-
-                    case "who":
-                        networkOutput.println(server.listAllClients());
-                        break;
-                    default:
-                        networkOutput.println("sorry only connect and who command working....");
-                        break;
-                }
+                if (cmd != null)
+                    switch (cmd) {
+                        case CONNECT:
+                            OnlineClient c = new OnlineClient(server, socket);
+                            server.addClient(c);
+                            System.out.println("new client is connected.check it by typing " + Command.WHO.getcommand() + " command");
+                            System.out.print("irc > ");
+                            socket=null;
+                            break;
+                        case WHO:
+                            break;
+                        default:
+                            server.getQueue().put("sorry only " + Command.CONNECT.getcommand() + " and " + Command.WHO.getcommand() + "commands working....");
+                            break;
+                    }
+                else
+                    server.getQueue().put("sorry only " + Command.CONNECT.getcommand() + " and " + Command.WHO.getcommand() + "commands working....");
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }
-        finally {
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
             try {
                 System.out.println("\nClosing connection…");
-                socket.close();
+                if (socket != null)
+                    socket.close();
+                if (input != null)
+                    input.close();
             } catch (IOException ioEx) {
                 System.out.println("Unable to disconnect!");
                 System.exit(1);
