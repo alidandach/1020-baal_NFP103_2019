@@ -1,9 +1,7 @@
 package client;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+
+import java.io.*;
 import java.net.Socket;
 
 public class Network extends Thread {
@@ -23,7 +21,6 @@ public class Network extends Thread {
         Socket socket = null;
         PrintWriter output = null;
         BufferedReader input = null;
-        StringBuilder response=new StringBuilder();
 
         try {
             socket = client.getSocket();
@@ -36,23 +33,18 @@ public class Network extends Thread {
                 //send data to server
                 output.println(client.getBridge().take());
 
-                //read data from server
-                String line;
-                while((line=input.readLine())!=null) {
-                    response.append(line);
-                    System.out.println(line);
-                    response.append(System.getProperty("line.separator"));
-                }
-                System.out.println("finish");
+                //read data from server and display data on console
+                int c;
+                String raw = "";
+                do {
+                    c = socket.getInputStream().read();
+                    raw+=(char)c;
+                } while(socket.getInputStream().available()>0);
 
-                //display data on console
-                System.out.println(response.toString());
+                System.out.println(raw);
 
                 //adjusting console
                 System.out.print("irc > ");
-
-                //cleanup response
-                response.setLength(0);
             }
 
         } catch (IOException e) {
