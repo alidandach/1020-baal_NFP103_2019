@@ -33,7 +33,7 @@ public class NetworkInput extends Thread {
         String request;
         try {
 
-            while (!server.isShutdown()) {
+            while (server.isRunning()) {
                 //waite for new client
                 socket = server.getServerSocket().accept();
                 input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -51,8 +51,6 @@ public class NetworkInput extends Thread {
                             System.out.print("irc > ");
                             socket=null;
                             break;
-                        case WHO:
-                            break;
                         default:
                             server.getQueue().put("sorry only " + Command.CONNECT.getcommand() + " and " + Command.WHO.getcommand() + "commands working....");
                             break;
@@ -61,9 +59,9 @@ public class NetworkInput extends Thread {
                     server.getQueue().put("sorry only " + Command.CONNECT.getcommand() + " and " + Command.WHO.getcommand() + "commands working....");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("problem in network thread:"+e.getMessage());
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            System.out.println("problem in network thread:"+e.getMessage());
         } finally {
             try {
                 System.out.println("\nClosing connection…");

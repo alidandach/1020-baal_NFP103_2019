@@ -25,6 +25,20 @@ public class OnlineClient extends Thread {
         }
     }
 
+    public String getHostName(){
+        return socket.getLocalAddress().getHostName();
+    }
+
+    public void disconnect(){
+        try {
+            input.close();
+            output.close();
+            socket.close();
+        } catch (IOException e) {
+            System.out.println("problem when closing client connection:" + e.getMessage());
+        }
+    }
+
     public void run() {
         String request;
         try {
@@ -46,15 +60,9 @@ public class OnlineClient extends Thread {
             }
         } catch (IOException e) {
             System.out.println("problem with client connection:" + e.getMessage());
-            Thread.currentThread().interrupt();
+            server.removeClient(getHostName());
         } finally {
-            try {
-                input.close();
-                output.close();
-                socket.close();
-            } catch (IOException e) {
-                System.out.println("problem when closing client connection:" + e.getMessage());
-            }
+            disconnect();
         }
 
     }

@@ -3,6 +3,7 @@ package server;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.util.Iterator;
 import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -10,7 +11,7 @@ import java.util.concurrent.BlockingQueue;
 
 public class Server {
     private int port;
-    private volatile boolean shutdown;
+    private volatile boolean running;
     private KeyBoardInput keyBoardInput;
     private NetworkInput networkInput;
     private ServerSocket serverSocket;
@@ -19,7 +20,7 @@ public class Server {
 
 
     public Server() {
-        shutdown = false;
+        running = true;
         clients = new Vector<>();
         queue = new ArrayBlockingQueue<>(1);
         keyBoardInput = new KeyBoardInput("server keyboard", this);
@@ -61,12 +62,22 @@ public class Server {
         return queue;
     }
 
-    public synchronized boolean isShutdown() {
-        return shutdown;
+    public synchronized boolean isRunning() {
+        return running;
     }
 
-    public synchronized void setShutdown() {
-        shutdown = true;
+    public synchronized void shutdown() {
+        try {
+            disconnectAllClients();
+            if (serverSocket != null)
+                serverSocket.close();
+            if (networkInput != null)
+                networkInput.interrupt();
+            running = false;
+        } catch (IOException e) {
+            System.out.println("problem when shutdown the server:" + e.getMessage());
+        }
+
     }
 
     public synchronized ServerSocket getServerSocket() {
@@ -78,8 +89,26 @@ public class Server {
         clients.add(c);
     }
 
-    public synchronized void removeClient(OnlineClient c) {
-        clients.remove(c);
+    public void disconnectAllClients() {
+        Iterator<OnlineClient> i = clients.iterator();
+        while (i.hasNext())
+            i.next().disconnect();
+    }
+
+    public synchronized void removeClient(String hostname) {
+        Iterator<OnlineClient> i = clients.iterator();
+
+        OnlineClient c = null;
+        while (i.hasNext()) {
+            c = i.next();
+            if (c.getHostName().equals(hostname))
+                break;
+        }
+        if (c != null) {
+            c.disconnect();
+            c.interrupt();
+            clients.remove(c);
+        }
     }
 
     public synchronized String listAllClients() {

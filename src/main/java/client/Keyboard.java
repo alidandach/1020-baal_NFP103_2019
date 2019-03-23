@@ -11,11 +11,11 @@ import java.net.Socket;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
-public class KeyBoard extends Thread {
+public class Keyboard extends Thread {
     private Client client;
     private Scanner input;
 
-    public KeyBoard(String n, Client c) {
+    public Keyboard(String n, Client c) {
         super(n);
         client = c;
         input = new Scanner(System.in);

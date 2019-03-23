@@ -7,7 +7,7 @@ public enum Command {
     KILL("server", "kill", "kill client ex: kill pc1"),
     HELP("both", "help", "Print a help message"),
     WHO("both", "who", "List all clients connected to server"),
-    START("both", "start", "Configure a machine to listen on a specific port ");
+    START("server", "start", "Configure a machine to listen on a specific port ");
 
     private String side;
     private String command;

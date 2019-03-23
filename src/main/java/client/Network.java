@@ -35,13 +35,13 @@ public class Network extends Thread {
 
                 //read data from server and display data on console
                 int c;
-                String raw = "";
+                String data = "";
                 do {
                     c = socket.getInputStream().read();
-                    raw+=(char)c;
+                    data+=(char)c;
                 } while(socket.getInputStream().available()>0);
 
-                System.out.println(raw);
+                System.out.println(data);
 
                 //adjusting console
                 System.out.print("irc > ");

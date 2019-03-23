@@ -1,5 +1,6 @@
 package client;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -7,13 +8,13 @@ import java.util.concurrent.BlockingQueue;
 public class Client {
     private Socket socket;
     private volatile boolean running;
-    private KeyBoard keyBoard;
+    private Keyboard keyBoard;
     private Network network;
     private BlockingQueue<String> bridge;
 
     public Client() {
         bridge = new ArrayBlockingQueue<>(1);
-        keyBoard = new KeyBoard("client keyboard", this);
+        keyBoard = new Keyboard("client keyboard", this);
         keyBoard.start();
         running = true;
     }
@@ -37,9 +38,18 @@ public class Client {
     }
 
     public void shutdown() {
-        network.interrupt();
-        keyBoard.interrupt();
-        running = false;
+        try {
+            if (socket != null)
+                socket.close();
+            running = false;
+            if (network != null)
+                network.interrupt();
+            keyBoard.interrupt();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public String toString() {

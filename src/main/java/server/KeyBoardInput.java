@@ -36,7 +36,7 @@ public class KeyBoardInput extends Thread {
         Command cmd = null;
 
 
-        while (!server.isShutdown()) {
+        while (server.isRunning()) {
 
 
             command = input.nextLine().split(" ");
@@ -45,32 +45,43 @@ public class KeyBoardInput extends Thread {
             if (cmd != null) {
                 switch (cmd) {
                     case START:
-                        if (command.length == 2) {
+                        if (command.length == 2)
                             System.out.println(server.setPort(command[1]));
-                        } else {
+                        else
                             System.out.println("invalid input... \n please enter an integer between 1024> and <65536");
-                        }
+                        System.out.print("irc > ");
                         break;
 
                     case WHO:
                         System.out.println(server.listAllClients());
+                        System.out.print("irc > ");
                         break;
+
                     case KILL:
                         server.removeClient(null);
+                        System.out.print("irc > ");
                         break;
+
                     case SHUTDOWN:
-                        server.setShutdown();
-                        System.exit(0);
+                        server.shutdown();
                         break;
+
                     case HELP:
                         Banner.adjustHelpMessage("server");
+                        System.out.print("irc > ");
                         break;
+                    default:
+                        System.out.println("invalid input...");
+                        Banner.adjustHelpMessage("server");
+                        System.out.print("irc > ");
+
                 }
             } else {
                 System.out.println("invalid input...");
                 Banner.adjustHelpMessage("server");
+                System.out.print("irc > ");
             }
-            System.out.print("irc > ");
+
         }
     }
 }
