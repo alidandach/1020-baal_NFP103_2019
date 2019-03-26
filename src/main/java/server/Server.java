@@ -89,12 +89,6 @@ public class Server {
         clients.add(c);
     }
 
-    public void disconnectAllClients() {
-        Iterator<OnlineClient> i = clients.iterator();
-        while (i.hasNext())
-            i.next().disconnect();
-    }
-
     public synchronized void removeClient(String hostname) {
         Iterator<OnlineClient> i = clients.iterator();
 
@@ -109,6 +103,12 @@ public class Server {
             c.interrupt();
             clients.remove(c);
         }
+    }
+
+    public void disconnectAllClients() {
+        Iterator<OnlineClient> i = clients.iterator();
+        while (i.hasNext())
+            i.next().disconnect();
     }
 
     public synchronized String listAllClients() {

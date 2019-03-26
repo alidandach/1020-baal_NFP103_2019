@@ -1,7 +1,10 @@
 package client;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
-import java.net.Socket;
+import java.net.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -27,8 +30,8 @@ public class Client {
         return socket;
     }
 
-    public void setSocket(Socket s) {
-        socket = s;
+    public void setSocket(String host,int port) throws IOException {
+        socket = new Socket(InetAddress.getByName(host),port);
         network = new Network("client network", this);
         network.start();
     }
@@ -37,19 +40,21 @@ public class Client {
         return running;
     }
 
-    public void shutdown() {
-        try {
-            if (socket != null)
-                socket.close();
-            running = false;
-            if (network != null)
-                network.interrupt();
-            keyBoard.interrupt();
+    public void shutdown() throws IOException{
+        if (socket != null)
+            socket.close();
+        if (network != null)
+            network.interrupt();
+        keyBoard.interrupt();
+        running = false;
+    }
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void clearBridge(){
+        bridge.clear();
+    }
 
+    public boolean isConnected() {
+        return network != null;
     }
 
     public String toString() {

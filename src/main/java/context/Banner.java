@@ -15,7 +15,7 @@ public class Banner {
      * @throws UnsupportedEncodingException
      */
     public static void loadBanner() {
-        InputStream fis =Banner.class.getClassLoader().getResourceAsStream("banner.txt");;
+        InputStream fis =Banner.class.getClassLoader().getResourceAsStream("banner.txt");
         byte[] data = new byte[0];
         try {
             data = new byte[fis.available()];

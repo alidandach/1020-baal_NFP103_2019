@@ -43,7 +43,7 @@ public class OnlineClient extends Thread {
         String request;
         try {
 
-            while (true) {
+            while (!this.isInterrupted()) {
                 // receive the command from client
                 request = input.readLine();
 
