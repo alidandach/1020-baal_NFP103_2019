@@ -5,54 +5,60 @@ import command.Command;
 import context.Banner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.slf4j.LoggerFactory;
 import validation.Validation;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.Socket;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
-/*import org.apache.log4j.PropertyConfigurator;*/
-
-// Import log4j classes.
 
 public class Keyboard extends Thread {
+
     private final static Logger logger = LogManager.getLogger(Keyboard.class);
-
-    //PropertyConfigurator.configure(Banner.class.getClassLoader().getResourceAsStream("log4j2.xml"));
-    // PropertyConfigurator.configure(Banner.class.getClassLoader().getResourceAsStream("log4j2.properties"));
-    // LoggerContext context = (LoggerContext) LogManager.getContext(false);
-    // context.setConfigLocation(Thread.currentThread().getContextClassLoader().getResource("log4j2.properties").toURI());
-
     private Client client;
     private Scanner input;
+    private String prefix;
 
     public Keyboard(String n, Client c) {
         super(n);
         client = c;
         input = new Scanner(System.in);
+        prefix = "irc > ";
     }
 
-    public Client getClient() {
-        return client;
+    private void startPrefix() {
+        System.out.print(prefix);
     }
 
-    public void setClient(Client client) {
-        this.client = client;
+    private void helpMessage(){
+        Banner.adjustHelpMessage("client");
+        startPrefix();
+    }
+
+    private void errorMessage() {
+        logger.warn("invalid input...");
+        Banner.adjustHelpMessage("client");
+    }
+
+    private void errorMessage(String message) {
+        logger.warn("invalid input...");
+        System.out.println(message);
+        Banner.adjustHelpMessage("client");
+    }
+
+    public synchronized void unplug(){
+        input.close();
     }
 
     @Override
     public void run() {
-        //display message at startup of program
+        //display banner and help message at startup of program
         Banner.loadBanner();
-        Banner.adjustHelpMessage("client");
-        System.out.print("irc > ");
-        String[] command = null;
-        Command cmd = null;
+        helpMessage();
+
+        String[] command;
+        Command cmd;
 
         while (client.isRunning()) {
             command = input.nextLine().trim().split(" ");
@@ -68,63 +74,47 @@ public class Keyboard extends Thread {
                                     try {
                                         Matcher matcher = Validation.CONNECT.getPattern().matcher(command[1]);
                                         if (matcher.matches()) {
-                                            String host = command[1].substring(0, command[1].indexOf('@'));
+                                            //String host = command[1].substring(0, command[1].indexOf('@'));
                                             String ip = command[1].substring(command[1].indexOf('@') + 1, command[1].indexOf(':'));
                                             String port = command[1].substring(command[1].indexOf(':') + 1);
+                                            client.clearBridge();
                                             client.getBridge().put(Command.CONNECT.getcommand());
-                                            client.setSocket(ip, Integer.parseInt(port));
-                                            System.out.print("irc > ");
-                                        }
+                                            client.setSocket(new Socket(ip, Integer.parseInt(port)));
+                                            logger.info("connected on " + ip + ":" + port);
+                                        } else
+                                            errorMessage();
                                     } catch (IOException e) {
-                                        logger.trace("Hello World");
-                                        logger.debug("Hello World");
-                                        logger.info("Hello World");
-                                        logger.warn("Hello World");
-                                        logger.error("Hello World");
-                                        System.out.print("irc > ");
+                                        logger.error("IO exception   ----->   " + e.getMessage());
                                     }
-                                } else {
-                                    System.out.println("you are already connected...");
-                                    System.out.print("irc > ");
-                                }
-
-                            }
+                                } else
+                                    logger.warn("you are already connected...");
+                            } else
+                                errorMessage();
+                            startPrefix();
                             break;
                         case WHO:
                             if (client.isConnected())
                                 client.getBridge().put(Command.WHO.getcommand());
-                            else {
-                                System.out.println("invalid input...");
-                                System.out.println("you are not connected to any server.please use " + Command.CONNECT.getcommand() + " command to connect to server.");
-                                Banner.adjustHelpMessage("client");
-                                System.out.print("irc > ");
-                            }
+                            else
+                                errorMessage("you are not connected to any server.please use " + Command.CONNECT.getcommand() + " command to connect to server.");
+                            startPrefix();
                             break;
                         case QUIT:
-                            try {
-                                client.shutdown();
-                            } catch (IOException e) {
-
-                            }
+                            client.shutdown();
                             break;
                         case HELP:
-                            Banner.adjustHelpMessage("client");
-                            System.out.print("irc > ");
+                           helpMessage();
                             break;
                         default:
-                            System.out.println("invalid input...");
-                            Banner.adjustHelpMessage("client");
-                            System.out.print("irc > ");
+                            errorMessage();
                     }
                 } catch (InterruptedException e) {
-                    System.out.println("problem in keyboard and network threads..." + e.getMessage());
-                    System.out.print("irc > ");
+                    logger.error("exception in Thread -----> " + e.getMessage());
+                    startPrefix();
                 }
-            } else {
-                System.out.println("invalid input...");
-                Banner.adjustHelpMessage("client");
-                System.out.print("irc > ");
-            }
+            } else
+                errorMessage();
+
 
         }
     }

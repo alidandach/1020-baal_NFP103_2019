@@ -1,8 +1,5 @@
 package client;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.*;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -17,22 +14,22 @@ public class Client {
 
     public Client() {
         bridge = new ArrayBlockingQueue<>(1);
-        keyBoard = new Keyboard("client keyboard", this);
+        keyBoard = new Keyboard("client keyboard thread", this);
         keyBoard.start();
         running = true;
     }
 
-    public BlockingQueue<String> getBridge() {
+    public synchronized BlockingQueue<String> getBridge() {
         return bridge;
     }
 
-    public Socket getSocket() {
+    public synchronized Socket getSocket() {
         return socket;
     }
 
-    public void setSocket(String host,int port) throws IOException {
-        socket = new Socket(InetAddress.getByName(host),port);
-        network = new Network("client network", this);
+    public synchronized void setSocket(Socket s) throws IOException {
+        socket = s;
+        network = new Network("client network thread", this);
         network.start();
     }
 
@@ -40,24 +37,21 @@ public class Client {
         return running;
     }
 
-    public void shutdown() throws IOException{
-        if (socket != null)
-            socket.close();
-        if (network != null)
-            network.interrupt();
-        keyBoard.interrupt();
+    public synchronized void shutdown(){
+        clearBridge();
         running = false;
+        keyBoard.unplug();
     }
 
-    public void clearBridge(){
+    public synchronized void clearBridge(){
         bridge.clear();
     }
 
-    public boolean isConnected() {
+    public synchronized boolean isConnected() {
         return network != null;
     }
 
-    public String toString() {
+    public synchronized String toString() {
         return "client " + socket.getLocalAddress() + " on port (" + socket.getLocalPort() + ")";
     }
 }

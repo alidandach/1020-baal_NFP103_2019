@@ -1,15 +1,20 @@
 package client;
 
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.*;
 import java.net.Socket;
 
 public class Network extends Thread {
     private Client client;
+    private final static Logger logger = LogManager.getLogger(Keyboard.class);
 
     public Network(String n, Client c) {
         super(n);
         client = c;
+        logger.info("network thread created");
     }
 
     public Client getClient() {
@@ -48,12 +53,12 @@ public class Network extends Thread {
             }
 
         } catch (IOException e) {
-            System.out.println("problem with server connection:" + e.getMessage());
+            logger.error("IO exception   ----->   " + e.getMessage());
         } catch (InterruptedException e) {
-            System.out.println("problem with your queue:" + e.getMessage());
+            logger.error("Thread Exception    ----->    "+e.getMessage());
         } finally {
             try {
-                System.out.println("\nClosing connection…");
+                logger.info("closing connection.....");
                 if (socket != null)
                     socket.close();
                 if (output != null)
@@ -61,8 +66,7 @@ public class Network extends Thread {
                 if (input != null)
                     input.close();
             } catch (IOException e) {
-                System.out.println("Unable to disconnect!" + e.getMessage());
-                System.exit(1);
+                logger.error("IO exception   ----->   " + e.getMessage());
             }
         }
     }
