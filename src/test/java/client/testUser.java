@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 
-public class testClient {
+public class testUser {
 
     @Test
     public void setSocket() throws IOException {

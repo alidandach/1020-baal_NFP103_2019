@@ -45,8 +45,7 @@ public class NetworkInput extends Thread {
                 if (cmd != null)
                     switch (cmd) {
                         case CONNECT:
-                            OnlineClient c = new OnlineClient(server, socket);
-                            server.addClient(c);
+                            server.addClient(new Client(server, socket));
                             System.out.println("new client is connected.check it by typing " + Command.WHO.getcommand() + " command");
                             System.out.print("irc > ");
                             socket=null;

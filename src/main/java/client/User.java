@@ -1,18 +1,20 @@
 package client;
 
+import command.Command;
+
 import java.io.IOException;
 import java.net.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public class Client {
+public class User {
     private Socket socket;
     private volatile boolean running;
     private Keyboard keyBoard;
     private Network network;
     private BlockingQueue<String> bridge;
 
-    public Client() {
+    public User() {
         bridge = new ArrayBlockingQueue<>(1);
         keyBoard = new Keyboard("client keyboard thread", this);
         keyBoard.start();
@@ -29,18 +31,16 @@ public class Client {
 
     public synchronized void setSocket(Socket s) throws IOException {
         socket = s;
-        network = new Network("client network thread", this);
-        network.start();
+        network = new Network(this);
     }
 
     public boolean isRunning() {
         return running;
     }
 
-    public synchronized void shutdown(){
-        clearBridge();
+    public synchronized void shutdown() throws IOException, InterruptedException {
         running = false;
-        keyBoard.unplug();
+        bridge.put(Command.QUIT.getcommand());
     }
 
     public synchronized void clearBridge(){

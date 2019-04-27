@@ -15,7 +15,7 @@ public class Server {
     private KeyBoardInput keyBoardInput;
     private NetworkInput networkInput;
     private ServerSocket serverSocket;
-    private Vector<OnlineClient> clients;
+    private Vector<Client> clients;
     private BlockingQueue<String> queue;
 
 
@@ -84,40 +84,75 @@ public class Server {
         return serverSocket;
     }
 
-    public synchronized void addClient(OnlineClient c) {
-        c.start();
+    public synchronized void addClient(Client c) {
         clients.add(c);
     }
 
-    public synchronized void removeClient(String hostname) {
-        Iterator<OnlineClient> i = clients.iterator();
-
-        OnlineClient c = null;
-        while (i.hasNext()) {
-            c = i.next();
-            if (c.getHostName().equals(hostname))
-                break;
-        }
-        if (c != null) {
-            c.disconnect();
-            c.interrupt();
-            clients.remove(c);
-        }
+    public synchronized void removeClient(Client c) {
+        clients.remove(c);
     }
 
     public void disconnectAllClients() {
-        Iterator<OnlineClient> i = clients.iterator();
+        Iterator<Client> i = clients.iterator();
         while (i.hasNext())
             i.next().disconnect();
+        clients = new Vector<>();
     }
 
     public synchronized String listAllClients() {
         if (clients.size() == 0)
             return "sorry no client connected to this server";
-        String out = "hostname\t\t\taddress\t\t\t\tport\n";
-        out += "---------------\t\t---------------\t\t------\n";
-        for (OnlineClient client : clients)
+
+        String out = "";
+
+        out += "hostname";
+        out += giveMeMoreSpace("hostname".length(), 15);
+        out += "\t\t\t";
+
+        out += "address";
+        out += giveMeMoreSpace("address".length(), 15);
+        out += "\t\t\t";
+
+        out += "port";
+        out += giveMeMoreSpace("port".length(), 5);
+
+        out += "\n";
+
+        out += insertDash(15);
+        out += "\t\t\t";
+
+
+        out += insertDash(15);
+        out += "\t\t\t";
+
+        out += insertDash(5);
+        out += "\n";
+
+        for (Client client : clients) {
             out += client.toString();
+            out += "\n";
+        }
+
         return out;
+    }
+
+    private String giveMeMoreSpace(int wordLength, int offset) {
+        String out = "";
+        for (int i = 0; i < offset - wordLength; i++)
+            out += " ";
+        return out;
+    }
+
+    private String insertDash(int number) {
+        String out = "";
+        for (int i = 0; i < number; i++)
+            out += "-";
+        return out;
+    }
+
+    public void broadcast(String message) {
+        for (Client client : clients) {
+            client.send(message);
+        }
     }
 }

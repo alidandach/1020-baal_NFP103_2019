@@ -16,13 +16,13 @@ import java.util.regex.Matcher;
 public class Keyboard extends Thread {
 
     private final static Logger logger = LogManager.getLogger(Keyboard.class);
-    private Client client;
+    private User user;
     private Scanner input;
     private String prefix;
 
-    public Keyboard(String n, Client c) {
+    public Keyboard(String n, User c) {
         super(n);
-        client = c;
+        user = c;
         input = new Scanner(System.in);
         prefix = "irc > ";
     }
@@ -31,23 +31,23 @@ public class Keyboard extends Thread {
         System.out.print(prefix);
     }
 
-    private void helpMessage(){
+    private void helpMessage() {
         Banner.adjustHelpMessage("client");
         startPrefix();
     }
 
     private void errorMessage() {
-        logger.warn("invalid input...");
+        System.out.println("invalid input...");
         Banner.adjustHelpMessage("client");
     }
 
     private void errorMessage(String message) {
-        logger.warn("invalid input...");
+        System.out.println("invalid input...");
         System.out.println(message);
         Banner.adjustHelpMessage("client");
     }
 
-    public synchronized void unplug(){
+    public synchronized void unplug() {
         input.close();
     }
 
@@ -60,7 +60,7 @@ public class Keyboard extends Thread {
         String[] command;
         Command cmd;
 
-        while (client.isRunning()) {
+        while (user.isRunning()) {
             command = input.nextLine().trim().split(" ");
             cmd = Command.getCommand(command[0]);
 
@@ -69,48 +69,51 @@ public class Keyboard extends Thread {
                     switch (cmd) {
                         case CONNECT:
                             if (command.length == 2) {
-                                //check if client already connected to server
-                                if (!client.isConnected()) {
+                                //check if user already connected to server
+                                if (!user.isConnected()) {
                                     try {
                                         Matcher matcher = Validation.CONNECT.getPattern().matcher(command[1]);
                                         if (matcher.matches()) {
                                             //String host = command[1].substring(0, command[1].indexOf('@'));
                                             String ip = command[1].substring(command[1].indexOf('@') + 1, command[1].indexOf(':'));
                                             String port = command[1].substring(command[1].indexOf(':') + 1);
-                                            client.clearBridge();
-                                            client.getBridge().put(Command.CONNECT.getcommand());
-                                            client.setSocket(new Socket(ip, Integer.parseInt(port)));
+                                            user.clearBridge();
+                                            user.getBridge().put(Command.CONNECT.getcommand());
+                                            user.setSocket(new Socket(ip, Integer.parseInt(port)));
                                             logger.info("connected on " + ip + ":" + port);
                                         } else
                                             errorMessage();
                                     } catch (IOException e) {
-                                        logger.error("IO exception   ----->   " + e.getMessage());
+                                        logger.error("IO exception in keyboard thread\t----->\t" + e.getMessage());
                                     }
                                 } else
-                                    logger.warn("you are already connected...");
+                                    System.out.println("you are already connected...");
                             } else
                                 errorMessage();
                             startPrefix();
                             break;
                         case WHO:
-                            if (client.isConnected())
-                                client.getBridge().put(Command.WHO.getcommand());
-                            else
-                                errorMessage("you are not connected to any server.please use " + Command.CONNECT.getcommand() + " command to connect to server.");
-                            startPrefix();
+                            if (user.isConnected())
+                                user.getBridge().put(Command.WHO.getcommand());
+                            else {
+                                System.out.println("you are not connected to any server.please use " + Command.CONNECT.getcommand() + " command to connect to server.");
+                                startPrefix();
+                            }
                             break;
                         case QUIT:
-                            client.shutdown();
+                            user.shutdown();
                             break;
                         case HELP:
-                           helpMessage();
+                            helpMessage();
                             break;
                         default:
                             errorMessage();
                     }
                 } catch (InterruptedException e) {
-                    logger.error("exception in Thread -----> " + e.getMessage());
+                    logger.error("Interrupted exception in keyboard thread\t----->\t" + e.getMessage());
                     startPrefix();
+                } catch (IOException e) {
+                    logger.error("IO exception in keyboard thread\t----->\t" + e.getMessage());
                 }
             } else
                 errorMessage();

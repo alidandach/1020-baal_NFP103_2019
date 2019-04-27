@@ -1,74 +1,115 @@
 package client;
 
 
+import command.Command;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.net.Socket;
 
-public class Network extends Thread {
-    private Client client;
-    private final static Logger logger = LogManager.getLogger(Keyboard.class);
+public class Network {
+    private User user;
+    private Thread transmitter;
+    private Thread receiver;
+    private volatile boolean connected;
+    private BufferedReader input = null;
+    private final static Logger logger = LogManager.getLogger(Network.class);
 
-    public Network(String n, Client c) {
-        super(n);
-        client = c;
-        logger.info("network thread created");
-    }
+    public Network(User u) {
+        user = u;
+        connected = true;
 
-    public Client getClient() {
-        return client;
-    }
-
-    @Override
-    public void run() {
-        Socket socket = null;
-        PrintWriter output = null;
-        BufferedReader input = null;
-
-        try {
-            socket = client.getSocket();
-            output = new PrintWriter(socket.getOutputStream(), true);
-            input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-            output.println(client.getBridge().take());
-
-            while (client.isRunning()) {
-                //send data to server
-                output.println(client.getBridge().take());
-
-                //read data from server and display data on console
-                int c;
-                String data = "";
-                do {
-                    c = socket.getInputStream().read();
-                    data+=(char)c;
-                } while(socket.getInputStream().available()>0);
-
-                System.out.println(data);
-
-                //adjusting console
-                System.out.print("irc > ");
-            }
-
-        } catch (IOException e) {
-            logger.error("IO exception   ----->   " + e.getMessage());
-        } catch (InterruptedException e) {
-            logger.error("Thread Exception    ----->    "+e.getMessage());
-        } finally {
+        //initialize transmitter
+        transmitter = new Thread(() -> {
+            Socket socket = null;
+            PrintWriter output = null;
             try {
-                logger.info("closing connection.....");
-                if (socket != null)
-                    socket.close();
+                socket = user.getSocket();
+                output = new PrintWriter(socket.getOutputStream(), true);
+                String request;
+                while (connected) {
+                    //wait to consume message
+                    request = user.getBridge().take();
+
+                    //send to server
+                    output.println(request);
+
+                    //check if need to turn off this thread
+                    if (request.equals(Command.QUIT.getcommand())) {
+                        connected = false;
+                        break;
+                    }
+
+
+                }
+
+            } catch (IOException e) {
+                logger.error("IO exception in transmitter thread\t----->\t" + e.getMessage());
+            } catch (InterruptedException e) {
+                logger.error("Interrupted exception in transmitter thread\t----->\t" + e.getMessage());
+            } finally {
+                System.out.println("closing transmitter connection.....");
                 if (output != null)
                     output.close();
-                if (input != null)
-                    input.close();
-            } catch (IOException e) {
-                logger.error("IO exception   ----->   " + e.getMessage());
             }
-        }
+
+
+        });
+        transmitter.start();
+
+        //initialize receiver
+        receiver = new Thread(() -> {
+            Socket socket = null;
+            try {
+                socket = user.getSocket();
+                input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                String response = null;
+                while (user.isRunning()) {
+                    //read data from server and display data on console
+                    int c;
+                    response = "";
+                    do {
+                        c = socket.getInputStream().read();
+                        response += (char) c;
+                    } while (socket.getInputStream().available() > 0);
+
+                    //Maybe disconnected from server
+                    if (response != null && response.equals(Command.QUIT.getcommand())) {
+                        //disconnect transmitter thread
+                        user.getBridge().put(Command.QUIT.getcommand());
+                        connected = false;
+                        break;
+                    }
+
+                    System.out.println(response);
+
+                    //adjusting console
+                    System.out.print("irc > ");
+                }
+            } catch (IOException e) {
+                logger.error("IO exception in receiver thread\t----->\t" + e.getMessage());
+            } catch (InterruptedException e) {
+                logger.error("Interrupted exception in receiver thread\t----->\t" + e.getMessage());
+            } finally {
+                try {
+                    System.out.println("closing receiver connection.....");
+                    if (input != null)
+                        input.close();
+                } catch (IOException e) {
+                    logger.error("IO exception in receiver thread\t----->\t" + e.getMessage());
+                }
+            }
+
+        });
+        receiver.start();
+
+        logger.info("socket is plugged");
     }
+
+    public boolean isConnected() {
+        return connected;
+    }
+
 }
 
