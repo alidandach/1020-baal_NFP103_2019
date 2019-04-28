@@ -15,7 +15,7 @@ public class Banner {
      * @throws UnsupportedEncodingException
      */
     public static void loadBanner() {
-        InputStream fis =Banner.class.getClassLoader().getResourceAsStream("banner.txt");
+        InputStream fis = Banner.class.getClassLoader().getResourceAsStream("banner.txt");
         byte[] data = new byte[0];
         try {
             data = new byte[fis.available()];
@@ -45,17 +45,52 @@ public class Banner {
      * @param side (server,client)
      */
     public static void adjustHelpMessage(String side) {
+        int commandLength = 15;
+        int descriptionLength = 60;
         String helpMessage = "\n";
-        helpMessage += "Command \t Description \n";
-        helpMessage += "------- \t ------------------------------------ \n";
+
+        helpMessage += "core commands\n";
+        helpMessage += insertSeparator('=', "core commands".length());
+        helpMessage += "\n";
+        helpMessage += "\n";
+
+        helpMessage += "Command";
+        helpMessage += giveMeMoreSpace("Command".length(), commandLength);
+        helpMessage += "\t\t\t";
+
+        helpMessage += "Description";
+        helpMessage += "\n";
+
+        helpMessage += insertSeparator('-', commandLength);
+        helpMessage += "\t\t\t";
+        helpMessage += insertSeparator('-', descriptionLength);
+        helpMessage += "\n";
+
         Command[] commands = Command.values();
         for (int i = 0; i < commands.length; i++)
-            if (commands[i].getSide().equals(side) || commands[i].getSide().equals("both"))
-                if (commands[i].getcommand().length() > 6)
-                    helpMessage += commands[i].getcommand() + " \t " + commands[i].getDescription() + " \n";
-                else
-                    helpMessage += commands[i].getcommand() + " \t \t " + commands[i].getDescription() + " \n";
+            if (commands[i].getSide().equals(side) || commands[i].getSide().equals("both")) {
+                helpMessage += commands[i].getcommand();
+                helpMessage += giveMeMoreSpace(commands[i].getcommand().length(), commandLength);
+                helpMessage += "\t\t\t";
+
+                helpMessage += commands[i].getDescription();
+                helpMessage += "\n";
+            }
 
         System.out.println(helpMessage);
+    }
+
+    private static String insertSeparator(char character, int number) {
+        String out = "";
+        for (int i = 0; i < number; i++)
+            out += character;
+        return out;
+    }
+
+    private static String giveMeMoreSpace(int wordLength, int caseLength) {
+        String out = "";
+        for (int i = 0; i < caseLength - wordLength; i++)
+            out += " ";
+        return out;
     }
 }

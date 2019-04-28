@@ -8,6 +8,7 @@ import java.util.Scanner;
 public class KeyBoardInput extends Thread {
     private Server server;
     private Scanner input;
+    public static String prefix="irc > ";
 
 
     public KeyBoardInput(String n, Server s) {
@@ -49,17 +50,17 @@ public class KeyBoardInput extends Thread {
                             System.out.println(server.setPort(command[1]));
                         else
                             System.out.println("invalid input... \n please enter an integer between 1024> and <65536");
-                        System.out.print("irc > ");
+                        System.out.print(prefix);
                         break;
 
                     case WHO:
                         System.out.println(server.listAllClients());
-                        System.out.print("irc > ");
+                        System.out.print(prefix);
                         break;
 
                     case KILL:
                         server.removeClient(null);
-                        System.out.print("irc > ");
+                        System.out.print(prefix);
                         break;
 
                     case SHUTDOWN:
@@ -68,18 +69,18 @@ public class KeyBoardInput extends Thread {
 
                     case HELP:
                         Banner.adjustHelpMessage("server");
-                        System.out.print("irc > ");
+                        System.out.print(prefix);
                         break;
                     default:
                         System.out.println("invalid input...");
                         Banner.adjustHelpMessage("server");
-                        System.out.print("irc > ");
+                        System.out.print(prefix);
 
                 }
             } else {
                 System.out.println("invalid input...");
                 Banner.adjustHelpMessage("server");
-                System.out.print("irc > ");
+                System.out.print(prefix);
             }
 
         }

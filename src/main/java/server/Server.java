@@ -1,8 +1,10 @@
 package server;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.Iterator;
 import java.util.Vector;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -68,12 +70,12 @@ public class Server {
 
     public synchronized void shutdown() {
         try {
-            disconnectAllClients();
-            if (serverSocket != null)
-                serverSocket.close();
-            if (networkInput != null)
-                networkInput.interrupt();
             running = false;
+            disconnectAllClients();
+            PrintWriter output = new PrintWriter(new Socket(InetAddress.getLocalHost(), port).getOutputStream(), true);
+            output.println("");
+            output.close();
+
         } catch (IOException e) {
             System.out.println("problem when shutdown the server:" + e.getMessage());
         }
@@ -85,11 +87,15 @@ public class Server {
     }
 
     public synchronized void addClient(Client c) {
+        for (Client client : clients)
+            client.send("\nserver say:new client online!");
+
         clients.add(c);
     }
 
     public synchronized void removeClient(Client c) {
         clients.remove(c);
+        broadcast(c.getHostName() + " left from server.");
     }
 
     public void disconnectAllClients() {
@@ -103,7 +109,16 @@ public class Server {
         if (clients.size() == 0)
             return "sorry no client connected to this server";
 
-        String out = "";
+        String out = "\n";
+
+        out += "online clients\n";
+        out += insertSeparator('=', "online clients".length());
+        out += "\n";
+        out += "\n";
+
+        out += "id";
+        out += giveMeMoreSpace("id".length(), 5);
+        out += "\t\t\t";
 
         out += "hostname";
         out += giveMeMoreSpace("hostname".length(), 15);
@@ -118,14 +133,17 @@ public class Server {
 
         out += "\n";
 
-        out += insertDash(15);
+        out += insertSeparator('-', 5);
+        out += "\t\t\t";
+
+        out += insertSeparator('-', 15);
         out += "\t\t\t";
 
 
-        out += insertDash(15);
+        out += insertSeparator('-', 15);
         out += "\t\t\t";
 
-        out += insertDash(5);
+        out += insertSeparator('-', 5);
         out += "\n";
 
         for (Client client : clients) {
@@ -143,16 +161,16 @@ public class Server {
         return out;
     }
 
-    private String insertDash(int number) {
+    private String insertSeparator(char character, int number) {
         String out = "";
         for (int i = 0; i < number; i++)
-            out += "-";
+            out += character;
         return out;
     }
 
     public void broadcast(String message) {
         for (Client client : clients) {
-            client.send(message);
+            client.send("\nserver say:" + message);
         }
     }
 }

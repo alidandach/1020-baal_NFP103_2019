@@ -16,18 +16,9 @@ public class NetworkInput extends Thread {
         server = s;
     }
 
-    public Server getServer() {
-        return server;
-    }
-
-    public void setServer(Server server) {
-        this.server = server;
-    }
-
-
     @Override
     public void run() {
-        Socket socket = null;
+        Socket socket=null;
         PrintWriter output = null;
         BufferedReader input = null;
         String request;
@@ -46,9 +37,9 @@ public class NetworkInput extends Thread {
                     switch (cmd) {
                         case CONNECT:
                             server.addClient(new Client(server, socket));
-                            System.out.println("new client is connected.check it by typing " + Command.WHO.getcommand() + " command");
+                            System.out.println("\nnew client is connected.check it by typing " + Command.WHO.getcommand() + " command");
                             System.out.print("irc > ");
-                            socket=null;
+                            socket = null;
                             break;
                         default:
                             server.getQueue().put("sorry only " + Command.CONNECT.getcommand() + " and " + Command.WHO.getcommand() + "commands working....");
@@ -58,9 +49,9 @@ public class NetworkInput extends Thread {
                     server.getQueue().put("sorry only " + Command.CONNECT.getcommand() + " and " + Command.WHO.getcommand() + "commands working....");
             }
         } catch (IOException e) {
-            System.out.println("problem in network thread:"+e.getMessage());
+            System.out.println("problem in network thread:" + e.getMessage());
         } catch (InterruptedException e) {
-            System.out.println("problem in network thread:"+e.getMessage());
+            System.out.println("problem in network thread:" + e.getMessage());
         } finally {
             try {
                 System.out.println("\nClosing connection…");
