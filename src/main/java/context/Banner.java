@@ -3,6 +3,8 @@ package context;
 import command.Command;
 
 import java.io.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * this class is non functionality it's just for organisation
@@ -47,50 +49,78 @@ public class Banner {
     public static void adjustHelpMessage(String side) {
         int commandLength = 15;
         int descriptionLength = 60;
-        String helpMessage = "\n";
+        StringBuilder helpMessage = new StringBuilder();
 
-        helpMessage += "core commands\n";
-        helpMessage += insertSeparator('=', "core commands".length());
-        helpMessage += "\n";
-        helpMessage += "\n";
-
-        helpMessage += "Command";
-        helpMessage += giveMeMoreSpace("Command".length(), commandLength);
-        helpMessage += "\t\t\t";
-
-        helpMessage += "Description";
-        helpMessage += "\n";
-
-        helpMessage += insertSeparator('-', commandLength);
-        helpMessage += "\t\t\t";
-        helpMessage += insertSeparator('-', descriptionLength);
-        helpMessage += "\n";
-
-        Command[] commands = Command.values();
-        for (int i = 0; i < commands.length; i++)
-            if (commands[i].getSide().equals(side) || commands[i].getSide().equals("both")) {
-                helpMessage += commands[i].getcommand();
-                helpMessage += giveMeMoreSpace(commands[i].getcommand().length(), commandLength);
-                helpMessage += "\t\t\t";
-
-                helpMessage += commands[i].getDescription();
-                helpMessage += "\n";
-            }
+        helpMessage.append(insertModule("core", '=', commandLength, descriptionLength, side));
 
         System.out.println(helpMessage);
     }
 
-    private static String insertSeparator(char character, int number) {
-        String out = "";
-        for (int i = 0; i < number; i++)
-            out += character;
-        return out;
+    private static String insertModule(String functionality, char functionalitySeparator, int commandLength, int descriptionLength, String side) {
+        StringBuilder out = new StringBuilder();
+        out.append("\n");
+
+        out.append(insertFunctionality("core", '='));
+
+        out.append(insertHeader(commandLength, descriptionLength, '-'));
+
+        out.append(insertDetails(Command.core(), side));
+
+        return out.toString();
     }
 
-    private static String giveMeMoreSpace(int wordLength, int caseLength) {
-        String out = "";
-        for (int i = 0; i < caseLength - wordLength; i++)
-            out += " ";
-        return out;
+    private static String insertFunctionality(String functionality, char separator) {
+        StringBuilder out = new StringBuilder();
+
+        out.append(String.format("%-7s", functionality));
+        out.append("commands");
+        out.append("\n");
+
+        Stream.generate(() -> separator)
+                .limit(15)
+                .forEach(out::append);
+
+        out.append("\n");
+        out.append("\n");
+
+        return out.toString();
+    }
+
+    private static String insertHeader(int commandLength, int descriptionLength, char separator) {
+        StringBuilder out = new StringBuilder();
+        StringBuilder separate = new StringBuilder();
+
+        out.append(String.format("%-23s", "Command"));
+        out.append("Description");
+        out.append("\n");
+
+        Stream.generate(() -> separator)
+                .limit(commandLength)
+                .forEach(separate::append);
+
+        out.append(String.format("%-23s", separate.toString()));
+
+        separate.setLength(0);
+
+        Stream.generate(() -> separator)
+                .limit(descriptionLength)
+                .forEach(separate::append);
+        out.append(separate.toString());
+
+        out.append("\n");
+        return out.toString();
+    }
+
+    private static String insertDetails(Command[] commands, String side) {
+        StringBuilder out = new StringBuilder();
+
+        for (int i = 0; i < commands.length; i++)
+            if (commands[i].getSide().equals(side) || commands[i].getSide().equals("both")) {
+                out.append(String.format("%-23s", commands[i].getCommand()));
+                out.append(commands[i].getDescription());
+                out.append("\n");
+            }
+
+        return out.toString();
     }
 }

@@ -14,7 +14,7 @@ public class User {
     private Network network;
     private BlockingQueue<String> bridge;
 
-    public User() {
+    User() {
         bridge = new ArrayBlockingQueue<>(1);
         keyBoard = new Keyboard("client keyboard thread", this);
         keyBoard.start();
@@ -29,7 +29,7 @@ public class User {
         return socket;
     }
 
-    public synchronized void setSocket(Socket s) throws IOException {
+    public synchronized void setSocket(Socket s) {
         socket = s;
         network = new Network(this);
     }
@@ -38,12 +38,27 @@ public class User {
         return running;
     }
 
-    public synchronized void shutdown() throws IOException, InterruptedException {
+    public synchronized void shutdown(boolean disconnectFromKeyboard) throws InterruptedException {
+        if(disconnectFromKeyboard)
+            network.disconnectFromKeyboard();
+
         running = false;
-        bridge.put(Command.QUIT.getcommand());
+
+        if (isConnected())
+            disconnect();
     }
 
-    public synchronized void clearBridge(){
+    /**
+     * this method used to disconnect user in safe mode
+     */
+    public synchronized void disconnect() throws InterruptedException {
+        clearBridge();
+        bridge.put(Command.QUIT.getCommand());
+        network = null;
+    }
+
+
+    public synchronized void clearBridge() {
         bridge.clear();
     }
 

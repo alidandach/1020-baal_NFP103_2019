@@ -37,16 +37,16 @@ public class NetworkInput extends Thread {
                     switch (cmd) {
                         case CONNECT:
                             server.addClient(new Client(server, socket));
-                            System.out.println("\nnew client is connected.check it by typing " + Command.WHO.getcommand() + " command");
+                            System.out.println("\nnew client is connected.check it by typing " + Command.CLIENTS.getCommand() + " command");
                             System.out.print("irc > ");
                             socket = null;
                             break;
                         default:
-                            server.getQueue().put("sorry only " + Command.CONNECT.getcommand() + " and " + Command.WHO.getcommand() + "commands working....");
+                            server.getQueue().put("sorry only " + Command.CONNECT.getCommand() + " and " + Command.CLIENTS.getCommand() + "commands working....");
                             break;
                     }
                 else
-                    server.getQueue().put("sorry only " + Command.CONNECT.getcommand() + " and " + Command.WHO.getcommand() + "commands working....");
+                    server.getQueue().put("sorry only " + Command.CONNECT.getCommand() + " and " + Command.CLIENTS.getCommand() + "commands working....");
             }
         } catch (IOException e) {
             System.out.println("problem in network thread:" + e.getMessage());

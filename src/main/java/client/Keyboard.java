@@ -20,7 +20,7 @@ public class Keyboard extends Thread {
     private Scanner input;
     private String prefix;
 
-    public Keyboard(String n, User c) {
+    Keyboard(String n, User c) {
         super(n);
         user = c;
         input = new Scanner(System.in);
@@ -41,7 +41,7 @@ public class Keyboard extends Thread {
         Banner.adjustHelpMessage("client");
     }
 
-    private void errorMessage(String message) {
+   /* private void errorMessage(String message) {
         System.out.println("invalid input...");
         System.out.println(message);
         Banner.adjustHelpMessage("client");
@@ -49,7 +49,7 @@ public class Keyboard extends Thread {
 
     public synchronized void unplug() {
         input.close();
-    }
+    }*/
 
     @Override
     public void run() {
@@ -78,7 +78,7 @@ public class Keyboard extends Thread {
                                             String ip = command[1].substring(command[1].indexOf('@') + 1, command[1].indexOf(':'));
                                             String port = command[1].substring(command[1].indexOf(':') + 1);
                                             user.clearBridge();
-                                            user.getBridge().put(Command.CONNECT.getcommand());
+                                            user.getBridge().put(Command.CONNECT.getCommand());
                                             user.setSocket(new Socket(ip, Integer.parseInt(port)));
                                             logger.info("connected on " + ip + ":" + port);
                                         } else
@@ -92,31 +92,32 @@ public class Keyboard extends Thread {
                                 errorMessage();
                             startPrefix();
                             break;
-                        case WHO:
+                        case CLIENTS:
                             if (user.isConnected())
-                                user.getBridge().put(Command.WHO.getcommand());
+                                user.getBridge().put(Command.CLIENTS.getCommand());
                             else {
-                                System.out.println("you are not connected to any server.please use " + Command.CONNECT.getcommand() + " command to connect to server.");
+                                System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
                                 startPrefix();
                             }
                             break;
                         case QUIT:
-                            user.shutdown();
+                            user.shutdown(true);
                             break;
                         case HELP:
                             helpMessage();
                             break;
                         default:
                             errorMessage();
+                            startPrefix();
                     }
                 } catch (InterruptedException e) {
                     logger.error("Interrupted exception in keyboard thread\t----->\t" + e.getMessage());
                     startPrefix();
-                } catch (IOException e) {
-                    logger.error("IO exception in keyboard thread\t----->\t" + e.getMessage());
                 }
-            } else
+            } else {
                 errorMessage();
+                startPrefix();
+            }
 
 
         }

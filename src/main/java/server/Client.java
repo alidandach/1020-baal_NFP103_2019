@@ -17,11 +17,9 @@ public class Client implements Comparable<Client> {
     private int id;
     private Server server;
     private Socket socket;
-    private Thread transmitter;
-    private Thread receiver;
     private volatile boolean connected;
+    private volatile boolean disconnectFromKeyboard;
     private BlockingQueue<String> bridge;
-    public static String prefix = "irc >";
 
     private final static Logger logger = LogManager.getLogger(Client.class);
 
@@ -33,11 +31,14 @@ public class Client implements Comparable<Client> {
         bridge = new ArrayBlockingQueue<>(1);
 
         //initialize transmitter
-        transmitter = new Thread(() -> {
-            PrintWriter output = null;
+        //wait to consume message
+        //send to client
+        //check if need to turn off this thread
+        Thread transmitter = new Thread(() -> {
+            PrintWriter output;
             try {
                 output = new PrintWriter(socket.getOutputStream(), true);
-                String data = null;
+                String data;
                 while (connected) {
                     //wait to consume message
                     data = bridge.take();
@@ -46,23 +47,26 @@ public class Client implements Comparable<Client> {
                     output.println(data);
 
                     //check if need to turn off this thread
-                    if (data.equals(Command.QUIT.getcommand()))
+                    if (data.equals(Command.QUIT.getCommand()))
                         break;
                 }
             } catch (IOException e) {
+                Interrupt();
+                newLine();
                 logger.error("IO exception   ----->   " + e.getMessage());
             } catch (InterruptedException e) {
+                Interrupt();
+                newLine();
                 logger.error("Thread Exception    ----->    " + e.getMessage());
-            } finally {
-                //logger.info("closing connection.....");
-                if (output != null)
-                    output.close();
             }
         });
         transmitter.start();
 
         //initialize receiver
-        receiver = new Thread(() -> {
+        // receive the command from client
+        //parse command
+        //handle command
+        Thread receiver = new Thread(() -> {
             BufferedReader input = null;
             try {
                 input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -75,98 +79,98 @@ public class Client implements Comparable<Client> {
                     Command cmd = Command.getCommand(request);
 
                     //handle command
-                    switch (cmd) {
-                        case WHO:
-                            bridge.put(server.listAllClients());
-                            break;
-                        case QUIT:
-                            disconnect();
-                            break;
+                    if (cmd != null) {
+                        switch (cmd) {
+                            case CLIENTS:
+                                bridge.put(server.listAllClients());
+                                break;
+                            case QUIT:
+                                server.removeClient(this, false);
+
+                                if (!disconnectFromKeyboard) {
+                                    System.out.println("\nThere is a client left");
+                                    startPrefix();
+                                }
+
+                                break;
+                        }
                     }
                 }
             } catch (IOException e) {
+                Interrupt();
+                newLine();
                 logger.error("IO exception in thread client\t----->\t" + e.getMessage());
+                startPrefix();
             } catch (InterruptedException e) {
+                Interrupt();
+                newLine();
                 logger.error("Interrupted exception in thread client\t----->\t" + e.getMessage());
+                startPrefix();
             } finally {
-              /*  try {
-                    //logger.info("closing connection.....");
+                try {
                     if (input != null)
                         input.close();
                 } catch (IOException e) {
                     logger.error("IO exception in thread client\t----->\t" + e.getMessage());
-                }*/
+                    startPrefix();
+                }
             }
 
         });
         receiver.start();
     }
 
-    public int getId() {
+    int getId() {
         return id;
     }
 
-    public String getHostName() {
+    private void startPrefix() {
+        String prefix = "irc >";
+        System.out.print(prefix);
+    }
+
+    private void newLine() {
+        System.out.println();
+    }
+
+    String getHostName() {
         return socket.getLocalAddress().getHostName();
     }
 
-    public void disconnect() {
+    void disconnect() {
         try {
             connected = false;
-            bridge.put(Command.QUIT.getcommand());
-            server.removeClient(this);
-
-            System.out.println("\nThere is a client left");
-            System.out.print(prefix);
-
+            bridge.put(Command.QUIT.getCommand());
 
         } catch (InterruptedException e) {
             logger.error("Interrupted exception in thread client\t----->\t" + e.getMessage());
         }
     }
 
+    void disconnectFromKeyboard() {
+        disconnectFromKeyboard = true;
+    }
 
-    public void send(String answer) {
+
+    private void Interrupt() {
+        bridge.clear();
+        server.removeClient(this, false);
+        server.broadcast(getHostName() + " left.");
+    }
+
+
+    void send(String answer) {
         bridge.add(answer);
     }
 
-    private String giveMeMoreSpace(int wordLength, int offset) {
-        String out = "";
-        for (int i = 0; i < offset - wordLength; i++)
-            out += " ";
-        return out;
-    }
 
     public String toString() {
-        String out = "";
-        //id
-        out += "" + id;
-        out += giveMeMoreSpace(("" + id).length(), 5);
-        out += "\t\t\t";
-
-        //host name
-        out += socket.getLocalAddress().getHostName();
-        out += giveMeMoreSpace(socket.getLocalAddress().getHostName().length(), 15);
-        out += "\t\t\t";
-
-        //ip address
-        out += socket.getLocalAddress().getHostAddress();
-        out += giveMeMoreSpace(socket.getLocalAddress().getHostAddress().length(), 15);
-        out += "\t\t\t";
-
-        //port number
-        out += socket.getPort();
-
-        return out;
+        return String.format("%-15s%-35s%-35s%-15s", id, getHostName(), socket.getLocalAddress().getHostAddress(), socket.getPort());
     }
 
     @Override
     public int compareTo(Client o) {
-        if (id > o.getId())
-            return 1;
-        if (id < o.getId())
-            return -1;
-        return 0;
+        return Integer.compare(id, o.getId());
     }
 
     public boolean equals(Object obj) {
@@ -178,8 +182,6 @@ public class Client implements Comparable<Client> {
 
         final Client c = (Client) obj;
 
-        if (id != c.getId())
-            return false;
-        return true;
+        return id == c.getId();
     }
 }

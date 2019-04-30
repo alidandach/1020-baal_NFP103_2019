@@ -2,39 +2,41 @@ package server;
 
 import command.Command;
 import context.Banner;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import validation.Validation;
 
 import java.util.Scanner;
+import java.util.regex.Matcher;
 
 public class KeyBoardInput extends Thread {
     private Server server;
     private Scanner input;
-    public static String prefix="irc > ";
+    private final static Logger logger = LogManager.getLogger(KeyBoardInput.class);
 
 
-    public KeyBoardInput(String n, Server s) {
+    KeyBoardInput(String n, Server s) {
         super(n);
         server = s;
         input = new Scanner(System.in);
     }
 
-    public Server getServer() {
-        return server;
+    private void startPrefix(){
+        String prefix = "irc > ";
+        System.out.print(prefix);
     }
 
-    public void setServer(Server server) {
-        this.server = server;
-    }
 
     @Override
     public void run() {
         //display message at startup of program
         Banner.loadBanner();
         Banner.adjustHelpMessage("server");
-        System.out.print("irc > ");
+        startPrefix();
 
 
-        String[] command = null;
-        Command cmd = null;
+        String[] command ;
+        Command cmd ;
 
 
         while (server.isRunning()) {
@@ -50,37 +52,59 @@ public class KeyBoardInput extends Thread {
                             System.out.println(server.setPort(command[1]));
                         else
                             System.out.println("invalid input... \n please enter an integer between 1024> and <65536");
-                        System.out.print(prefix);
+                        startPrefix();
                         break;
 
-                    case WHO:
+                    case CLIENTS:
                         System.out.println(server.listAllClients());
-                        System.out.print(prefix);
+                        startPrefix();
                         break;
 
                     case KILL:
-                        server.removeClient(null);
-                        System.out.print(prefix);
+                        if (!server.isStarted())
+                            System.out.println("sorry...you must to start listening on a specific port");
+                        else if (server.getNumberOfClients() == 0)
+                            System.out.println("sorry...No client to kill");
+                        else if (command.length != 2)
+                            System.out.println("invalid input...check it by typing " + Command.HELP.getCommand() + " command");
+                        else if (command[1] != null) {
+                            Matcher matcher = Validation.KILL.getPattern().matcher(command[1]);
+                            if (matcher.matches()) {
+                                String[] s = command[1].split("pc");
+                                try {
+                                    Client c = server.getClientById(Integer.parseInt(s[1]));
+                                    if (c != null)
+                                        server.removeClient(c,true);
+                                    else
+                                        System.out.println("maybe client left or not exist...check it by typing " + Command.CLIENTS.getCommand());
+                                } catch (NumberFormatException e) {
+                                    System.out.println();
+                                    logger.error("Number format exception in keyboard thread\t----->\t" + e.getMessage());
+                                }
+
+                            } else
+                                System.out.println("invalid input...check it by typing " + Command.HELP.getCommand() + " command");
+                        }
+                        startPrefix();
                         break;
 
-                    case SHUTDOWN:
+                    case QUIT:
                         server.shutdown();
                         break;
 
                     case HELP:
                         Banner.adjustHelpMessage("server");
-                        System.out.print(prefix);
+                        startPrefix();
                         break;
                     default:
                         System.out.println("invalid input...");
                         Banner.adjustHelpMessage("server");
-                        System.out.print(prefix);
-
+                        startPrefix();
                 }
             } else {
                 System.out.println("invalid input...");
                 Banner.adjustHelpMessage("server");
-                System.out.print(prefix);
+                startPrefix();
             }
 
         }
