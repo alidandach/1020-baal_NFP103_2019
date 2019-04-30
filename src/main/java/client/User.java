@@ -2,7 +2,6 @@ package client;
 
 import command.Command;
 
-import java.io.IOException;
 import java.net.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -21,25 +20,25 @@ public class User {
         running = true;
     }
 
-    public synchronized BlockingQueue<String> getBridge() {
+     synchronized BlockingQueue<String> getBridge() {
         return bridge;
     }
 
-    public synchronized Socket getSocket() {
+     synchronized Socket getSocket() {
         return socket;
     }
 
-    public synchronized void setSocket(Socket s) {
+     synchronized void setSocket(Socket s) {
         socket = s;
         network = new Network(this);
     }
 
-    public boolean isRunning() {
+     boolean isRunning() {
         return running;
     }
 
-    public synchronized void shutdown(boolean disconnectFromKeyboard) throws InterruptedException {
-        if(disconnectFromKeyboard)
+     synchronized void shutdown() throws InterruptedException {
+        if(network!=null)
             network.disconnectFromKeyboard();
 
         running = false;
@@ -51,18 +50,18 @@ public class User {
     /**
      * this method used to disconnect user in safe mode
      */
-    public synchronized void disconnect() throws InterruptedException {
+     synchronized void disconnect() throws InterruptedException {
         clearBridge();
         bridge.put(Command.QUIT.getCommand());
         network = null;
     }
 
 
-    public synchronized void clearBridge() {
+     synchronized void clearBridge() {
         bridge.clear();
     }
 
-    public synchronized boolean isConnected() {
+     synchronized boolean isConnected() {
         return network != null;
     }
 

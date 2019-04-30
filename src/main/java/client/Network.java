@@ -143,11 +143,7 @@ public class Network {
         logger.info("socket is plugged");
     }
 
-    public boolean isConnected() {
-        return connected;
-    }
-
-    public void disconnectFromKeyboard() {
+    void disconnectFromKeyboard() {
         disconnectFromKeyboard = true;
     }
 

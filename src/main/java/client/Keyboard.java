@@ -101,7 +101,7 @@ public class Keyboard extends Thread {
                             }
                             break;
                         case QUIT:
-                            user.shutdown(true);
+                            user.shutdown();
                             break;
                         case HELP:
                             helpMessage();
