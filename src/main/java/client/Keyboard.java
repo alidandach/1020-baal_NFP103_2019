@@ -9,16 +9,16 @@ import validation.Validation;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
 
 public class Keyboard extends Thread {
-
-    private final static Logger logger = LogManager.getLogger(Keyboard.class);
     private User user;
     private Scanner input;
     private String prefix;
+    private final static Logger logger = LogManager.getLogger(Keyboard.class);
 
     Keyboard(String n, User c) {
         super(n);
@@ -40,16 +40,6 @@ public class Keyboard extends Thread {
         System.out.println("invalid input...");
         Banner.adjustHelpMessage("client");
     }
-
-   /* private void errorMessage(String message) {
-        System.out.println("invalid input...");
-        System.out.println(message);
-        Banner.adjustHelpMessage("client");
-    }
-
-    public synchronized void unplug() {
-        input.close();
-    }*/
 
     @Override
     public void run() {
@@ -78,7 +68,7 @@ public class Keyboard extends Thread {
                                             String ip = command[1].substring(command[1].indexOf('@') + 1, command[1].indexOf(':'));
                                             String port = command[1].substring(command[1].indexOf(':') + 1);
                                             user.clearBridge();
-                                            user.getBridge().put(Command.CONNECT.getCommand());
+                                            user.send(Command.CONNECT.getCommand());
                                             user.setSocket(new Socket(ip, Integer.parseInt(port)));
                                             logger.info("connected on " + ip + ":" + port);
                                         } else
@@ -94,11 +84,31 @@ public class Keyboard extends Thread {
                             break;
                         case CLIENTS:
                             if (user.isConnected())
-                                user.getBridge().put(Command.CLIENTS.getCommand());
+                                user.send(Command.CLIENTS.getCommand());
                             else {
                                 System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
                                 startPrefix();
                             }
+                            break;
+                        case CHAT_WITH_USER:
+                            if(user.isConnected()){
+                                if(command.length==3){
+                                    //parse id of pc
+                                    Matcher matcher = Validation.CLIENT.getPattern().matcher(command[1]);
+                                    if (matcher.matches()) {
+                                        String s = Arrays.toString(command);
+                                        user.send(s.substring(1, s.length()-1).replace(",", ""));
+                                    }
+                                    else
+                                        errorMessage();
+                                }
+                                else
+                                    errorMessage();
+                            }
+                            else
+                                System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
+
+                            startPrefix();
                             break;
                         case QUIT:
                             user.shutdown();

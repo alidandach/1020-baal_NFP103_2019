@@ -42,7 +42,7 @@ public class KeyBoardInput extends Thread {
         while (server.isRunning()) {
 
 
-            command = input.nextLine().split(" ");
+            command = input.nextLine().trim().split(" ");
             cmd = Command.getCommand(command[0]);
 
             if (cmd != null) {
@@ -68,7 +68,7 @@ public class KeyBoardInput extends Thread {
                         else if (command.length != 2)
                             System.out.println("invalid input...check it by typing " + Command.HELP.getCommand() + " command");
                         else if (command[1] != null) {
-                            Matcher matcher = Validation.KILL.getPattern().matcher(command[1]);
+                            Matcher matcher = Validation.CLIENT.getPattern().matcher(command[1]);
                             if (matcher.matches()) {
                                 String[] s = command[1].split("pc");
                                 try {

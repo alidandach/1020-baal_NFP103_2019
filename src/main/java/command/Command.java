@@ -8,7 +8,8 @@ public enum Command {
     HELP("both", "core","help", "Print a help message"),
     KILL("server", "core","kill", "kill client ex: kill pc1"),
     QUIT("both", "core","quit", "Exit"),
-    START("server", "core","start", "Configure a machine to listen on a specific port ");
+    START("server", "core","start", "Configure a machine to listen on a specific port "),
+    CHAT_WITH_USER("client", "chat","usr", "chat with another client ex: usr pc1 message");
 
     private String side;
     private String functionality;
@@ -26,8 +27,6 @@ public enum Command {
         return side;
     }
 
-    public String getFunctionality(){return functionality;}
-
     public String getCommand() {
         return command;
     }
@@ -43,6 +42,16 @@ public enum Command {
                 return value;
         }
         return null;
+    }
+
+    public static Command[] byFunctionality(String type){
+        switch (type){
+            case "core":return core();
+            case "chat":return chat();
+            case "group":return group();
+            case "file":return file();
+            default: return null;
+        }
     }
 
     public static Command[] core(){

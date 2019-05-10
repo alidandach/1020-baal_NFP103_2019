@@ -30,8 +30,7 @@ public class Server {
     }
 
 
-
-     String setPort(String p) {
+    String setPort(String p) {
         if (p == null)
             return "null";
         else if (serverSocket != null)
@@ -56,19 +55,19 @@ public class Server {
         return "server started...";
     }
 
-     BlockingQueue<String> getQueue() {
+    BlockingQueue<String> getQueue() {
         return queue;
     }
 
-     synchronized boolean isRunning() {
+    synchronized boolean isRunning() {
         return running;
     }
 
-     synchronized boolean isStarted() {
+    synchronized boolean isStarted() {
         return networkInput != null;
     }
 
-     synchronized void shutdown() {
+    synchronized void shutdown() {
         try {
             running = false;
 
@@ -101,7 +100,7 @@ public class Server {
             c.disconnectFromKeyboard();
         c.disconnect();
         clients.remove(c);
-        broadcast(c.getHostName() + " left.");
+        broadcast("(pc"+c.getId()+")"+c.getHostName() + " back offline.");
     }
 
     private void disconnectAllClients() {

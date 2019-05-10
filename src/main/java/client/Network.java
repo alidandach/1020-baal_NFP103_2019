@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.net.Socket;
 
-public class Network {
+ class Network {
     private User user;
     private volatile boolean connected;
     private volatile boolean first;
@@ -59,7 +59,7 @@ public class Network {
 
                 if (!first && !disconnectFromKeyboard) {
                     System.out.println("back offline.try connect to the server");
-                    System.out.print(prefix);
+                    startPrefix();
                 }
                 first = !first;
             }
@@ -102,7 +102,7 @@ public class Network {
                     System.out.print(response);
 
                     //adjusting console
-                    System.out.print("irc > ");
+                    startPrefix();
 
                     //clear response
                     response.setLength(0);
@@ -125,7 +125,7 @@ public class Network {
 
                     if (!first && !disconnectFromKeyboard) {
                         System.out.println("back offline.try connect to the server");
-                        System.out.print(prefix);
+                        startPrefix();
                     }
 
                     first = !first;
@@ -145,6 +145,10 @@ public class Network {
 
     void disconnectFromKeyboard() {
         disconnectFromKeyboard = true;
+    }
+
+    private void startPrefix(){
+        System.out.print(prefix);
     }
 
 }

@@ -3,6 +3,7 @@ package server;
 import command.Command;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import validation.Validation;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.regex.Matcher;
 
 public class Client implements Comparable<Client> {
     private static int counter = 1;
@@ -23,7 +25,7 @@ public class Client implements Comparable<Client> {
 
     private final static Logger logger = LogManager.getLogger(Client.class);
 
-    public Client(Server s, Socket socket) {
+    Client(Server s, Socket socket) {
         id = counter++;
         server = s;
         this.socket = socket;
@@ -53,11 +55,11 @@ public class Client implements Comparable<Client> {
             } catch (IOException e) {
                 Interrupt();
                 newLine();
-                logger.error("IO exception   ----->   " + e.getMessage());
+                logger.error("IO exception\t----->\t" + e.getMessage());
             } catch (InterruptedException e) {
                 Interrupt();
                 newLine();
-                logger.error("Thread Exception    ----->    " + e.getMessage());
+                logger.error("Thread Exception\t----->\t" + e.getMessage());
             }
         });
         transmitter.start();
@@ -75,8 +77,11 @@ public class Client implements Comparable<Client> {
                     // receive the command from client
                     request = input.readLine();
 
+                    //request contains command and parameters
+                    String [] command=request.trim().split(" ");
+
                     //parse command
-                    Command cmd = Command.getCommand(request);
+                    Command cmd = Command.getCommand(command[0]);
 
                     //handle command
                     if (cmd != null) {
@@ -93,8 +98,22 @@ public class Client implements Comparable<Client> {
                                 }
 
                                 break;
+                            case CHAT_WITH_USER:
+                                if(command.length==3){
+                                    //parse id of pc
+                                    Matcher matcher = Validation.CLIENT.getPattern().matcher(command[1]);
+                                    if (matcher.matches()) {
+                                        String[] pcs = command[1].split("pc");
+                                        Client c = server.getClientById(Integer.parseInt(pcs[1]));
+                                        if(c!=null)
+                                            c.send("(pc"+id+")"+getHostName()+" say:"+command[2]);
+
+                                    }
+                                }
+                                break;
                         }
                     }
+
                 }
             } catch (IOException e) {
                 Interrupt();
@@ -120,23 +139,40 @@ public class Client implements Comparable<Client> {
         receiver.start();
     }
 
+    /**
+     * method return id of current client
+     * @return int id of client
+     */
     int getId() {
         return id;
     }
 
+    /**
+     * method used to adjusting console style
+     */
     private void startPrefix() {
         String prefix = "irc >";
         System.out.print(prefix);
     }
 
+    /**
+     * method used to put new line on console server
+     */
     private void newLine() {
         System.out.println();
     }
 
+    /**
+     * method to return host name of current client
+     * @return String indicate the host name of client
+     */
     String getHostName() {
         return socket.getLocalAddress().getHostName();
     }
 
+    /**
+     * this method used to disconnect the current client
+     */
     void disconnect() {
         try {
             connected = false;
@@ -147,18 +183,26 @@ public class Client implements Comparable<Client> {
         }
     }
 
+    /**
+     * this method used by the admin of server to kill specific client
+     */
     void disconnectFromKeyboard() {
         disconnectFromKeyboard = true;
     }
 
 
+    /**
+     * every user connected have thread.this method used to kill current client(2 thread in and out) and remove it from clients list on the server
+     */
     private void Interrupt() {
         bridge.clear();
         server.removeClient(this, false);
-        server.broadcast(getHostName() + " left.");
     }
 
-
+    /**
+     * this method used to send message (answer) to the user
+     * @param answer String to be send towards user
+     */
     void send(String answer) {
         bridge.add(answer);
     }
