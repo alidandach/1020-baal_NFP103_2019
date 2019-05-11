@@ -56,7 +56,7 @@ public class KeyBoardInput extends Thread {
                         break;
 
                     case CLIENTS:
-                        System.out.println(server.listAllClients());
+                        System.out.println(server.getClients());
                         startPrefix();
                         break;
 

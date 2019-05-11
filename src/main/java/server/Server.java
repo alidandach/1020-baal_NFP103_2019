@@ -11,7 +11,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.stream.Stream;
 
 
-public class Server {
+class Server {
     private int port;
     private volatile boolean running;
     private KeyBoardInput keyBoardInput;
@@ -100,7 +100,7 @@ public class Server {
             c.disconnectFromKeyboard();
         c.disconnect();
         clients.remove(c);
-        broadcast("(pc"+c.getId()+")"+c.getHostName() + " back offline.");
+        broadcast("(pc" + c.getId() + ")" + c.getHostName() + " back offline.");
     }
 
     private void disconnectAllClients() {
@@ -119,7 +119,12 @@ public class Server {
         return null;
     }
 
-    synchronized String listAllClients() {
+    /**
+     * method list all clients connected to the server
+     *
+     * @return String contain all clients with styling
+     */
+    synchronized String getClients() {
         if (clients.size() == 0)
             return "sorry no client connected to this server";
 
@@ -162,6 +167,7 @@ public class Server {
         out.append(separate.toString()).append("\n");
         separate.setLength(0);
 
+
         for (Client client : clients)
             out.append(client.toString()).append("\n");
 
@@ -169,8 +175,12 @@ public class Server {
         return out.toString();
     }
 
-
-    void broadcast(String message) {
+    /**
+     * method used to broadcast message foreach client connected to the server
+     *
+     * @param message String contain of message
+     */
+    private void broadcast(String message) {
         for (Client client : clients) {
             client.send("\nserver say:" + message);
         }

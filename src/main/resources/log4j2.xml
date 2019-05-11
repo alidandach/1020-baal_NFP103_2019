@@ -2,11 +2,23 @@
 <Configuration status="WARN">
     <Properties>
         <Property name="log-path">logs</Property>
+        <Property name="ROLLING_LOG_FILE_NAME" value="${sys:LOG_FILE}" />
+        <Property name="APP_LOG_FOLDER" value="${ROLLING_LOG_FILE_NAME}" />
+        <Property name="APP_LOG_BASE_DIRECTORY" value="${sys:dtep.logs.home}${sys:file.separator}${APP_LOG_FOLDER}" />
+        <Property name="CONSOLE_LOG_PATTERN"
+                  value="%date{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%5level} %style{%5processId}{normal, blue} --- [%15thread] %style{%logger{1.}}{normal, cyan} : %message%n%throwable%n" />
+        <Property name="FILE_LOG_PATTERN"
+                  value="%date{yyyy-MM-dd HH:mm:ss.SSS} %5level %5processId --- [%15thread] %logger{1.} : %message%n%throwable%n" />
     </Properties>
+
+
     <Appenders>
 
-        <Console name="console" target="SYSTEM_OUT" follow="true">
-            <PatternLayout pattern="%-5p | %d{yyyy-MM-dd HH:mm:ss} | [%t] %C{2} (%F:%L) - %m%n"/>
+        <Console name="console" target="SYSTEM_OUT" follow="true" >
+            <!--<PatternLayout pattern="[%color{%p}] %-5p | %d{yyyy-MM-dd HH:mm:ss} | [%t] %C{2} (%F:%L) - %m%n"/>-->
+            <PatternLayout pattern="%date{yyyy-MM-dd HH:mm:ss.SSS} | %highlight{%5level} | %style{%-5p}{normal, blue} --- [%15thread] %style{%logger{1.}}{normal, cyan} %C{2} (%F:%L) : %message%n%throwable%n"/>
+
+<!--        <PatternLayout  pattern="${CONSOLE_LOG_PATTERN}" />-->
         </Console>
 
         <File name="file" fileName="logger.log" immediateFlush="false" append="false">

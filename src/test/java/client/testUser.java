@@ -1,6 +1,7 @@
 package client;
 
-import org.junit.Test;
+
+import org.junit.gen5.api.Test;
 
 import java.io.IOException;
 import java.net.InetAddress;

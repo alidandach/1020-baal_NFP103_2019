@@ -8,14 +8,14 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
- * this class is non functionality it's just for organisation
+ * this class is non functionality it's just for styling
  */
 public class Banner {
-    private static char FUNCTIONALITY_SEPARATOR='=';
-    private static char HEADER_SEPARATOR='-';
+    private static char FUNCTIONALITY_SEPARATOR = '=';
+    private static char HEADER_SEPARATOR = '-';
+
     /**
      * this method to read file(banner.txt) and print the output on the terminal.It's used at startup
-     *
      */
     public static void loadBanner() {
         InputStream fis = Banner.class.getClassLoader().getResourceAsStream("banner.txt");
@@ -48,11 +48,12 @@ public class Banner {
         int commandLength = 15;
         int descriptionLength = 60;
 
-        System.out.println(insertModule("core",  commandLength, descriptionLength, side));
-        System.out.println(insertModule("chat",  commandLength, descriptionLength, side));
+        System.out.println(insertModule("core", commandLength, descriptionLength, side));
+        if (side.equals("client"))
+            System.out.println(insertModule("chat", commandLength, descriptionLength, side));
     }
 
-    private static String insertModule(String functionality,  int commandLength, int descriptionLength, String side) {
+    private static String insertModule(String functionality, int commandLength, int descriptionLength, String side) {
 
         return "\n" +
                 insertFunctionality(functionality) +
@@ -60,6 +61,11 @@ public class Banner {
                 insertDetails(Objects.requireNonNull(Command.byFunctionality(functionality)), side);
     }
 
+    /**
+     * method to print header of functionality
+     * @param functionality String used to identify
+     * @return String functionality header
+     */
     private static String insertFunctionality(String functionality) {
         StringBuilder out = new StringBuilder();
 
@@ -77,6 +83,12 @@ public class Banner {
         return out.toString();
     }
 
+    /**
+     * method used to print header commands and there description
+     * @param commandLength int number of '-' under command word
+     * @param descriptionLength int number of '-' under description word
+     * @return String header
+     */
     private static String insertHeader(int commandLength, int descriptionLength) {
         StringBuilder out = new StringBuilder();
         StringBuilder separate = new StringBuilder();
@@ -102,6 +114,12 @@ public class Banner {
         return out.toString();
     }
 
+    /**
+     * method used to print details foreach command
+     * @param commands array of Commands to be printed
+     * @param side String server or client
+     * @return String of details
+     */
     private static String insertDetails(Command[] commands, String side) {
         StringBuilder out = new StringBuilder();
 

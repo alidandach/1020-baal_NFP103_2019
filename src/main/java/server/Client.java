@@ -78,7 +78,7 @@ public class Client implements Comparable<Client> {
                     request = input.readLine();
 
                     //request contains command and parameters
-                    String [] command=request.trim().split(" ");
+                    String[] command = request.trim().split(" ");
 
                     //parse command
                     Command cmd = Command.getCommand(command[0]);
@@ -87,7 +87,7 @@ public class Client implements Comparable<Client> {
                     if (cmd != null) {
                         switch (cmd) {
                             case CLIENTS:
-                                bridge.put(server.listAllClients());
+                                bridge.put(server.getClients());
                                 break;
                             case QUIT:
                                 server.removeClient(this, false);
@@ -99,14 +99,17 @@ public class Client implements Comparable<Client> {
 
                                 break;
                             case CHAT_WITH_USER:
-                                if(command.length==3){
+                                if (command.length == 3) {
                                     //parse id of pc
                                     Matcher matcher = Validation.CLIENT.getPattern().matcher(command[1]);
                                     if (matcher.matches()) {
                                         String[] pcs = command[1].split("pc");
-                                        Client c = server.getClientById(Integer.parseInt(pcs[1]));
-                                        if(c!=null)
-                                            c.send("(pc"+id+")"+getHostName()+" say:"+command[2]);
+                                        int partnerId = Integer.parseInt(pcs[1]);
+                                        if (partnerId != id) {
+                                            Client c = server.getClientById(partnerId);
+                                            if (c != null)
+                                                c.send(getHostName() + " [pc" + id + "] say:" + command[2]);
+                                        }
 
                                     }
                                 }
@@ -141,6 +144,7 @@ public class Client implements Comparable<Client> {
 
     /**
      * method return id of current client
+     *
      * @return int id of client
      */
     int getId() {
@@ -164,6 +168,7 @@ public class Client implements Comparable<Client> {
 
     /**
      * method to return host name of current client
+     *
      * @return String indicate the host name of client
      */
     String getHostName() {
@@ -201,6 +206,7 @@ public class Client implements Comparable<Client> {
 
     /**
      * this method used to send message (answer) to the user
+     *
      * @param answer String to be send towards user
      */
     void send(String answer) {
