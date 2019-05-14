@@ -49,7 +49,7 @@ public class Group {
     }
 
     /**
-     * method to delete specific client
+     * method to delete specific user
      *
      * @param deletedClient Client to be deleted
      */
@@ -62,7 +62,7 @@ public class Group {
     }
 
     /**
-     * method used to send message foreach client connected to the group
+     * method used to send message foreach user connected to the group
      * @param sender Client who send the message
      * @param message String contain of message
      */

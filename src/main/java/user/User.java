@@ -1,4 +1,4 @@
-package client;
+package user;
 
 import command.Command;
 
@@ -13,19 +13,17 @@ public class User {
     private BlockingQueue<String> bridge;
     private volatile boolean running;
 
-    User() {
+    public User() {
         bridge = new ArrayBlockingQueue<>(1);
-        keyboard = new Keyboard("client keyboard thread", this);
+        keyboard = new Keyboard("user keyboard thread", this);
         keyboard.start();
         running = true;
     }
 
-    synchronized BlockingQueue<String> getBridge() {
-        return bridge;
-    }
 
     /**
      * this method return the plugged socket of the user
+     *
      * @return plugged socket
      */
     synchronized Socket getSocket() {
@@ -34,6 +32,7 @@ public class User {
 
     /**
      * this method used to initialize network thread and put the user online with the server
+     *
      * @param s socket plugged into server
      */
     synchronized void setSocket(Socket s) {
@@ -43,6 +42,7 @@ public class User {
 
     /**
      * this method used to check if server is still running
+     *
      * @return boolean if true the user is still running else user exactly turned off
      */
     synchronized boolean isRunning() {
@@ -52,6 +52,7 @@ public class User {
     /**
      * this method used to shutdown network thread if it's running and the keyboard thread.
      * after shutdown the network and keyboard threads the main thread turn off automatically
+     *
      * @throws InterruptedException in case of thread is waiting, sleeping, or otherwise occupied, and the thread is interrupted, either before or during the activity.
      */
     synchronized void shutdown() throws InterruptedException {
@@ -86,16 +87,30 @@ public class User {
     }
 
     /**
-     * this method used to send message via network to server
-     * @param message is the string to be send towards server
+     * this method used to produce message from keyboard
+     *
+     * @param message String to be produce
+     *
      * @throws InterruptedException in case of thread is waiting, sleeping, or otherwise occupied, and the thread is interrupted, either before or during the activity.
      */
-    synchronized void send(String message) throws InterruptedException {
+    synchronized void produce(String message) throws InterruptedException {
         bridge.put(message);
     }
 
     /**
+     * this method used to consume message using network
+     *
+     * @return String to be consume
+     *
+     * @throws InterruptedException in case of thread is waiting, sleeping, or otherwise occupied, and the thread is interrupted, either before or during the activity.
+     */
+     String consume() throws InterruptedException {
+        return bridge.take();
+    }
+
+    /**
      * this method used
+     *
      * @return boolean if is true the user is connected else is offline
      */
     synchronized boolean isConnected() {

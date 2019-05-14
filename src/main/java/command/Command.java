@@ -6,10 +6,10 @@ public enum Command {
     CLIENTS("both", "core","who", "List all clients connected to server"),
     CONNECT("client","core", "connect", "Connect to the server ex: connect root@192.168.0.10:5555"),
     HELP("both", "core","help", "Print a help message"),
-    KILL("server", "core","kill", "kill client ex: kill pc1"),
+    KILL("server", "core","kill", "kill user ex: kill pc1"),
     QUIT("both", "core","quit", "Exit"),
     START("server", "core","start", "Configure a machine to listen on a specific port ex: start 5555"),
-    CHAT_WITH_USER("client", "chat","usr", "chat with another client ex: usr pc1 message");
+    CHAT_WITH_USER("client", "chat","usr", "chat with another user ex: usr pc1 message");
 
     private String side;
     private String functionality;

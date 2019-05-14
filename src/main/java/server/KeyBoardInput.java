@@ -64,7 +64,7 @@ public class KeyBoardInput extends Thread {
                         if (!server.isStarted())
                             System.out.println("sorry...you must to start listening on a specific port");
                         else if (server.getNumberOfClients() == 0)
-                            System.out.println("sorry...No client to kill");
+                            System.out.println("sorry...No user to kill");
                         else if (command.length != 2)
                             System.out.println("invalid input...check it by typing " + Command.HELP.getCommand() + " command");
                         else if (command[1] != null) {
@@ -76,7 +76,7 @@ public class KeyBoardInput extends Thread {
                                     if (c != null)
                                         server.removeClient(c,true);
                                     else
-                                        System.out.println("maybe client left or not exist...check it by typing " + Command.CLIENTS.getCommand());
+                                        System.out.println("maybe user left or not exist...check it by typing " + Command.CLIENTS.getCommand());
                                 } catch (NumberFormatException e) {
                                     System.out.println();
                                     logger.error("Number format exception in keyboard thread\t----->\t" + e.getMessage());

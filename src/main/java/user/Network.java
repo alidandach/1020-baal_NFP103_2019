@@ -1,4 +1,4 @@
-package client;
+package user;
 
 
 import command.Command;
@@ -24,7 +24,7 @@ import java.net.Socket;
 
         //initialize transmitter
         //wait to consume message
-        //send to server
+        //produce to server
         //check if need to turn off this thread
         Thread transmitter = new Thread(() -> {
             Socket socket;
@@ -35,9 +35,9 @@ import java.net.Socket;
                 String request;
                 while (connected) {
                     //wait to consume message
-                    request = user.getBridge().take();
+                    request = user.consume();
 
-                    //send to server
+                    //produce to server
                     output.println(request);
 
                     //check if need to turn off this thread

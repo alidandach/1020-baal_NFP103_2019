@@ -1,4 +1,4 @@
-package client;
+package user;
 
 
 import org.junit.gen5.api.Test;

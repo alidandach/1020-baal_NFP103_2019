@@ -1,4 +1,4 @@
-package client;
+package user;
 
 
 import command.Command;
@@ -68,7 +68,7 @@ public class Keyboard extends Thread {
                                             String ip = command[1].substring(command[1].indexOf('@') + 1, command[1].indexOf(':'));
                                             String port = command[1].substring(command[1].indexOf(':') + 1);
                                             user.clearBridge();
-                                            user.send(Command.CONNECT.getCommand());
+                                            user.produce(Command.CONNECT.getCommand());
                                             user.setSocket(new Socket(ip, Integer.parseInt(port)));
                                             logger.info("connected on " + ip + ":" + port);
                                         } else
@@ -84,7 +84,7 @@ public class Keyboard extends Thread {
                             break;
                         case CLIENTS:
                             if (user.isConnected())
-                                user.send(Command.CLIENTS.getCommand());
+                                user.produce(Command.CLIENTS.getCommand());
                             else {
                                 System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
                                 startPrefix();
@@ -97,7 +97,7 @@ public class Keyboard extends Thread {
                                     Matcher matcher = Validation.CLIENT.getPattern().matcher(command[1]);
                                     if (matcher.matches()) {
                                         String s = Arrays.toString(command);
-                                        user.send(s.substring(1, s.length()-1).replace(",", ""));
+                                        user.produce(s.substring(1, s.length()-1).replace(",", ""));
                                     }
                                     else
                                         errorMessage();

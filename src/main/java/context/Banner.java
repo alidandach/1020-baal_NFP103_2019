@@ -40,9 +40,9 @@ public class Banner {
 
 
     /**
-     * this method used to print the help message.it's take side as parameter and print help message correspond (server or client)
+     * this method used to print the help message.it's take side as parameter and print help message correspond (server or user)
      *
-     * @param side (server,client)
+     * @param side (server,user)
      */
     public static void adjustHelpMessage(String side) {
         int commandLength = 15;
@@ -117,7 +117,7 @@ public class Banner {
     /**
      * method used to print details foreach command
      * @param commands array of Commands to be printed
-     * @param side String server or client
+     * @param side String server or user
      * @return String of details
      */
     private static String insertDetails(Command[] commands, String side) {

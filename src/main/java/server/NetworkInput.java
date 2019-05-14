@@ -25,7 +25,7 @@ public class NetworkInput extends Thread {
         try {
 
             while (server.isRunning()) {
-                //waite for new client
+                //waite for new user
                 socket = server.getServerSocket().accept();
                 input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 request = input.readLine();
@@ -37,7 +37,7 @@ public class NetworkInput extends Thread {
                     switch (cmd) {
                         case CONNECT:
                             server.addClient(new Client(server, socket));
-                            System.out.println("\nnew client is connected.check it by typing " + Command.CLIENTS.getCommand() + " command");
+                            System.out.println("\nnew user is connected.check it by typing " + Command.CLIENTS.getCommand() + " command");
                             System.out.print("irc > ");
                             socket = null;
                             break;

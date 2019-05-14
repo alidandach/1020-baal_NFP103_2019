@@ -11,7 +11,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.stream.Stream;
 
 
-class Server {
+public class Server {
     private int port;
     private volatile boolean running;
     private KeyBoardInput keyBoardInput;
@@ -21,7 +21,7 @@ class Server {
     private BlockingQueue<String> queue;
 
 
-    Server() {
+    public Server() {
         running = true;
         clients = new Vector<>();
         queue = new ArrayBlockingQueue<>(1);
@@ -29,7 +29,12 @@ class Server {
         keyBoardInput.start();
     }
 
-
+    /**
+     * method used to set port to start listing
+     *
+     * @param p int port number
+     * @return String message
+     */
     String setPort(String p) {
         if (p == null)
             return "null";
@@ -59,14 +64,29 @@ class Server {
         return queue;
     }
 
+    /**
+     * method used to check server status
+     *
+     * @return boolean if true
+     */
     synchronized boolean isRunning() {
         return running;
     }
 
+    /**
+     * method used to check the status of network on the server
+     *
+     * @return boolean if true network is started
+     */
     synchronized boolean isStarted() {
         return networkInput != null;
     }
 
+    /**
+     * this method used to shutdown network thread if it's running and the keyboard thread.
+     * after shutdown the network and keyboard threads the main thread turn off automatically
+     *
+     */
     synchronized void shutdown() {
         try {
             running = false;
@@ -88,13 +108,24 @@ class Server {
         return serverSocket;
     }
 
+    /**
+     * method used to add new user
+     *
+     * @param c Client to be added
+     */
     synchronized void addClient(Client c) {
         for (Client client : clients)
-            client.send("\nserver say:new client online!");
+            client.send("\nserver say:new user online!");
 
         clients.add(c);
     }
 
+    /**
+     * remove specific user.you need to identify if to need remove theme using keyboard or network
+     *
+     * @param c Client to be deleted
+     * @param fromKeyboard boolean if true disconnect using keyboard
+     */
     synchronized void removeClient(Client c, boolean fromKeyboard) {
         if (fromKeyboard)
             c.disconnectFromKeyboard();
@@ -103,15 +134,31 @@ class Server {
         broadcast("(pc" + c.getId() + ")" + c.getHostName() + " back offline.");
     }
 
+    /**
+     * method used to disconnect all clients connected to server
+     * it's used when server need to reset or shutdown
+     */
     private void disconnectAllClients() {
         for (Client client : clients) client.disconnect();
         clients = new Vector<>();
     }
 
+    /**
+     * method used to get number of clients connected
+     *
+     * @return int number of clients connected
+     */
     synchronized int getNumberOfClients() {
         return clients.size();
     }
 
+    /**
+     * method used to get specific user using id
+     *
+     * @param id int id of user
+     *
+     * @return Client founded or null if not found
+     */
     synchronized Client getClientById(int id) {
         for (Client client : clients)
             if (client.getId() == id)
@@ -126,7 +173,7 @@ class Server {
      */
     synchronized String getClients() {
         if (clients.size() == 0)
-            return "sorry no client connected to this server";
+            return "sorry no user connected to this server";
 
         StringBuilder out = new StringBuilder();
         StringBuilder separate = new StringBuilder();
@@ -176,7 +223,7 @@ class Server {
     }
 
     /**
-     * method used to broadcast message foreach client connected to the server
+     * method used to broadcast message foreach user connected to the server
      *
      * @param message String contain of message
      */

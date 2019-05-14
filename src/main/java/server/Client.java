@@ -34,7 +34,7 @@ public class Client implements Comparable<Client> {
 
         //initialize transmitter
         //wait to consume message
-        //send to client
+        //send to user
         //check if need to turn off this thread
         Thread transmitter = new Thread(() -> {
             PrintWriter output;
@@ -45,7 +45,7 @@ public class Client implements Comparable<Client> {
                     //wait to consume message
                     data = bridge.take();
 
-                    //send to client
+                    //send to user
                     output.println(data);
 
                     //check if need to turn off this thread
@@ -65,7 +65,7 @@ public class Client implements Comparable<Client> {
         transmitter.start();
 
         //initialize receiver
-        // receive the command from client
+        // receive the command from user
         //parse command
         //handle command
         Thread receiver = new Thread(() -> {
@@ -74,7 +74,7 @@ public class Client implements Comparable<Client> {
                 input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 String request;
                 while (connected) {
-                    // receive the command from client
+                    // receive the command from user
                     request = input.readLine();
 
                     //request contains command and parameters
@@ -93,7 +93,7 @@ public class Client implements Comparable<Client> {
                                 server.removeClient(this, false);
 
                                 if (!disconnectFromKeyboard) {
-                                    System.out.println("\nThere is a client left");
+                                    System.out.println("\nThere is a user left");
                                     startPrefix();
                                 }
 
@@ -121,19 +121,19 @@ public class Client implements Comparable<Client> {
             } catch (IOException e) {
                 Interrupt();
                 newLine();
-                logger.error("IO exception in thread client\t----->\t" + e.getMessage());
+                logger.error("IO exception in thread user\t----->\t" + e.getMessage());
                 startPrefix();
             } catch (InterruptedException e) {
                 Interrupt();
                 newLine();
-                logger.error("Interrupted exception in thread client\t----->\t" + e.getMessage());
+                logger.error("Interrupted exception in thread user\t----->\t" + e.getMessage());
                 startPrefix();
             } finally {
                 try {
                     if (input != null)
                         input.close();
                 } catch (IOException e) {
-                    logger.error("IO exception in thread client\t----->\t" + e.getMessage());
+                    logger.error("IO exception in thread user\t----->\t" + e.getMessage());
                     startPrefix();
                 }
             }
@@ -143,9 +143,9 @@ public class Client implements Comparable<Client> {
     }
 
     /**
-     * method return id of current client
+     * method return id of current user
      *
-     * @return int id of client
+     * @return int id of user
      */
     int getId() {
         return id;
@@ -167,16 +167,16 @@ public class Client implements Comparable<Client> {
     }
 
     /**
-     * method to return host name of current client
+     * method to return host name of current user
      *
-     * @return String indicate the host name of client
+     * @return String indicate the host name of user
      */
     String getHostName() {
         return socket.getLocalAddress().getHostName();
     }
 
     /**
-     * this method used to disconnect the current client
+     * this method used to disconnect the current user
      */
     void disconnect() {
         try {
@@ -184,12 +184,12 @@ public class Client implements Comparable<Client> {
             bridge.put(Command.QUIT.getCommand());
 
         } catch (InterruptedException e) {
-            logger.error("Interrupted exception in thread client\t----->\t" + e.getMessage());
+            logger.error("Interrupted exception in thread user\t----->\t" + e.getMessage());
         }
     }
 
     /**
-     * this method used by the admin of server to kill specific client
+     * this method used by the admin of server to kill specific user
      */
     void disconnectFromKeyboard() {
         disconnectFromKeyboard = true;
@@ -197,7 +197,7 @@ public class Client implements Comparable<Client> {
 
 
     /**
-     * every user connected have thread.this method used to kill current client(2 thread in and out) and remove it from clients list on the server
+     * every user connected have thread.this method used to kill current user(2 thread in and out) and remove it from clients list on the server
      */
     private void Interrupt() {
         bridge.clear();
