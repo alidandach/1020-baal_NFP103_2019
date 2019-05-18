@@ -46,7 +46,7 @@ public class Server {
                 return "null";
             this.port = port;
             try {
-                serverSocket = new ServerSocket(port, 50, InetAddress.getLocalHost());
+                serverSocket = new ServerSocket(port);
                 networkInput = new NetworkInput("networkInput server", this);
                 networkInput.start();
             } catch (IOException e) {

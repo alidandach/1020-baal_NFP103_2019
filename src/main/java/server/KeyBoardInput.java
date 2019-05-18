@@ -21,7 +21,7 @@ public class KeyBoardInput extends Thread {
         input = new Scanner(System.in);
     }
 
-    private void startPrefix(){
+    private void startPrefix() {
         String prefix = "irc > ";
         System.out.print(prefix);
     }
@@ -35,12 +35,11 @@ public class KeyBoardInput extends Thread {
         startPrefix();
 
 
-        String[] command ;
-        Command cmd ;
+        String[] command;
+        Command cmd;
 
 
         while (server.isRunning()) {
-
 
             command = input.nextLine().trim().split(" ");
             cmd = Command.getCommand(command[0]);
@@ -74,7 +73,7 @@ public class KeyBoardInput extends Thread {
                                 try {
                                     Client c = server.getClientById(Integer.parseInt(s[1]));
                                     if (c != null)
-                                        server.removeClient(c,true);
+                                        server.removeClient(c, true);
                                     else
                                         System.out.println("maybe user left or not exist...check it by typing " + Command.CLIENTS.getCommand());
                                 } catch (NumberFormatException e) {

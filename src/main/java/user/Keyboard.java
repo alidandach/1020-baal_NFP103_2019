@@ -58,15 +58,23 @@ public class Keyboard extends Thread {
                 try {
                     switch (cmd) {
                         case CONNECT:
-                            if (command.length == 2) {
+                            if (command.length == 7) {
                                 //check if user already connected to server
                                 if (!user.isConnected()) {
                                     try {
-                                        Matcher matcher = Validation.CONNECT.getPattern().matcher(command[1]);
+                                        StringBuilder request = new StringBuilder();
+                                        for (int i = 1; i < command.length; i++)
+                                            request.append(command[i]).append(" ");
+
+                                        Matcher matcher = Validation.CONNECT.getPattern().matcher(request.toString().trim());
                                         if (matcher.matches()) {
-                                            //String host = command[1].substring(0, command[1].indexOf('@'));
-                                            String ip = command[1].substring(command[1].indexOf('@') + 1, command[1].indexOf(':'));
-                                            String port = command[1].substring(command[1].indexOf(':') + 1);
+                                            //String username=command[2];
+                                            //String password=command[4];
+
+                                            String[] host = command[6].split(":");
+                                            String ip = host[0];
+                                            String port = host[1];
+
                                             user.clearBridge();
                                             user.produce(Command.CONNECT.getCommand());
                                             user.setSocket(new Socket(ip, Integer.parseInt(port)));
@@ -91,21 +99,18 @@ public class Keyboard extends Thread {
                             }
                             break;
                         case CHAT_WITH_USER:
-                            if(user.isConnected()){
-                                if(command.length==3){
+                            if (user.isConnected()) {
+                                if (command.length == 3) {
                                     //parse id of pc
                                     Matcher matcher = Validation.CLIENT.getPattern().matcher(command[1]);
                                     if (matcher.matches()) {
                                         String s = Arrays.toString(command);
-                                        user.produce(s.substring(1, s.length()-1).replace(",", ""));
-                                    }
-                                    else
+                                        user.produce(s.substring(1, s.length() - 1).replace(",", ""));
+                                    } else
                                         errorMessage();
-                                }
-                                else
+                                } else
                                     errorMessage();
-                            }
-                            else
+                            } else
                                 System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
 
                             startPrefix();

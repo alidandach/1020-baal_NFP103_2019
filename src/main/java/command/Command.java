@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public enum Command {
     CLIENTS("both", "core","who", "List all clients connected to server"),
-    CONNECT("client","core", "connect", "Connect to the server ex: connect root@192.168.0.10:5555"),
+    CONNECT("client","core", "connect", "Connect to the server ex: connect -u root -p yourPassword -h 192.168.0.10:5555"),
     HELP("both", "core","help", "Print a help message"),
     KILL("server", "core","kill", "kill user ex: kill pc1"),
     QUIT("both", "core","quit", "Exit"),
