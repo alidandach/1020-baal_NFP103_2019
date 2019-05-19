@@ -9,7 +9,13 @@ public enum Command {
     KILL("server", "core","kill", "kill user ex: kill pc1"),
     QUIT("both", "core","quit", "Exit"),
     START("server", "core","start", "Configure a machine to listen on a specific port ex: start 5555"),
-    CHAT_WITH_USER("client", "chat","usr", "chat with another user ex: usr pc1 message");
+    CHAT_WITH_USER("client", "chat","usr", "chat with another user ex: usr pc1 message"),
+    CREATE_GROUP("client","group","create_grp","create group ex: create_grp nameOfYourGroup"),
+    DELETE_GROUP("both","group","delete_grp","delete group if you are admin of group ex: delete_grp nameOfGroup"),
+    EXIT_GROUP("client","group","exit_grp","exit group ex: exit_grp nameOfGroup"),
+    JOIN_GROUP("client","group","join_grp","join group ex: join_grp nameOfGroup"),
+    LIST_GROUPS("both","group","list_grp","list all groups founded on the server"),
+    SEND_FILE("client","file","send","send file to some one connected to the server");
 
     private String side;
     private String functionality;

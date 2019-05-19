@@ -46,11 +46,16 @@ public class Banner {
      */
     public static void adjustHelpMessage(String side) {
         int commandLength = 15;
-        int descriptionLength = 60;
-
+        int descriptionLength = 80;
+        //print core commands
         System.out.println(insertModule("core", commandLength, descriptionLength, side));
+        //print chat commands
         if (side.equals("client"))
             System.out.println(insertModule("chat", commandLength, descriptionLength, side));
+        //print group commands
+        System.out.println(insertModule("group", commandLength, descriptionLength, side));
+        //print file commands
+        System.out.println(insertModule("file", commandLength, descriptionLength, side));
     }
 
     private static String insertModule(String functionality, int commandLength, int descriptionLength, String side) {
@@ -63,6 +68,7 @@ public class Banner {
 
     /**
      * method to print header of functionality
+     *
      * @param functionality String used to identify
      * @return String functionality header
      */
@@ -85,7 +91,8 @@ public class Banner {
 
     /**
      * method used to print header commands and there description
-     * @param commandLength int number of '-' under command word
+     *
+     * @param commandLength     int number of '-' under command word
      * @param descriptionLength int number of '-' under description word
      * @return String header
      */
@@ -116,8 +123,9 @@ public class Banner {
 
     /**
      * method used to print details foreach command
+     *
      * @param commands array of Commands to be printed
-     * @param side String server or user
+     * @param side     String server or user
      * @return String of details
      */
     private static String insertDetails(Command[] commands, String side) {
@@ -129,7 +137,7 @@ public class Banner {
                 out.append(command.getDescription());
                 out.append("\n");
             }
-
+        out.append("\n");
         return out.toString();
     }
 }
