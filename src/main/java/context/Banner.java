@@ -55,7 +55,8 @@ public class Banner {
         //print group commands
         System.out.println(insertModule("group", commandLength, descriptionLength, side));
         //print file commands
-        System.out.println(insertModule("file", commandLength, descriptionLength, side));
+        if (side.equals("client"))
+            System.out.println(insertModule("file", commandLength, descriptionLength, side));
     }
 
     private static String insertModule(String functionality, int commandLength, int descriptionLength, String side) {

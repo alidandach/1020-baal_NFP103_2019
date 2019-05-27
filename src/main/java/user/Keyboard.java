@@ -115,6 +115,64 @@ public class Keyboard extends Thread {
 
                             startPrefix();
                             break;
+                        case CREATE_GROUP:
+                            if (user.isConnected()) {
+                                if (command.length == 2) {
+                                    user.produce(Command.CREATE_GROUP.getCommand() + " " + command[1]);
+                                } else
+                                    errorMessage();
+                            } else
+                                System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
+
+                            startPrefix();
+                            break;
+                        case JOIN_GROUP:
+                            if (user.isConnected()) {
+                                if (command.length == 2) {
+                                    user.produce(Command.JOIN_GROUP.getCommand() + " " + command[1]);
+                                } else
+                                    errorMessage();
+                            } else
+                                System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
+                            startPrefix();
+                            break;
+                        case EXIT_GROUP:
+                            if (user.isConnected()) {
+                                if (command.length == 2) {
+                                    user.produce(Command.EXIT_GROUP.getCommand() + " " + command[1]);
+                                } else
+                                    errorMessage();
+                            } else
+                                System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
+                            startPrefix();
+                            break;
+                        case DELETE_GROUP:
+                            if (user.isConnected()) {
+                                if (command.length == 2) {
+                                    user.produce(Command.DELETE_GROUP.getCommand() + " " + command[1]);
+                                } else
+                                    errorMessage();
+                            } else
+                                System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
+                            startPrefix();
+                            break;
+                        case LIST_GROUPS:
+                            if (user.isConnected()) {
+                                user.produce(Command.LIST_GROUPS.getCommand());
+                            } else
+                                System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
+                            startPrefix();
+                            break;
+                        case SEND_FILE:
+                            if (user.isConnected()) {
+                                if (command.length == 2)
+                                    user.produce(Command.SEND_FILE.getCommand());
+                                else
+                                    errorMessage();
+                            } else
+                                System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
+                            startPrefix();
+                            break;
                         case QUIT:
                             user.shutdown();
                             break;

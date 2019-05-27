@@ -18,12 +18,14 @@ public class Server {
     private NetworkInput networkInput;
     private ServerSocket serverSocket;
     private Vector<Client> clients;
+    private Vector<Group> groups;
     private BlockingQueue<String> queue;
 
 
     public Server() {
         running = true;
         clients = new Vector<>();
+        groups = new Vector<>();
         queue = new ArrayBlockingQueue<>(1);
         keyBoardInput = new KeyBoardInput("server keyboard", this);
         keyBoardInput.start();
@@ -85,7 +87,6 @@ public class Server {
     /**
      * this method used to shutdown network thread if it's running and the keyboard thread.
      * after shutdown the network and keyboard threads the main thread turn off automatically
-     *
      */
     synchronized void shutdown() {
         try {
@@ -123,7 +124,7 @@ public class Server {
     /**
      * remove specific user.you need to identify if to need remove theme using keyboard or network
      *
-     * @param c Client to be deleted
+     * @param c            Client to be deleted
      * @param fromKeyboard boolean if true disconnect using keyboard
      */
     synchronized void removeClient(Client c, boolean fromKeyboard) {
@@ -156,7 +157,6 @@ public class Server {
      * method used to get specific user using id
      *
      * @param id int id of user
-     *
      * @return Client founded or null if not found
      */
     synchronized Client getClientById(int id) {
@@ -171,7 +171,7 @@ public class Server {
      *
      * @return String contain all clients with styling
      */
-    synchronized String getClients() {
+    synchronized String displayClients() {
         if (clients.size() == 0)
             return "sorry no user connected to this server";
 
@@ -189,6 +189,25 @@ public class Server {
 
 
         out.append(String.format("%-15s%-35s%-35s%-15s", "id", "hostname", "address", "port")).append("\n");
+
+        out.append(insertHeaderStyle());
+
+
+        for (Client client : clients)
+            out.append(client.toString()).append("\n");
+
+
+        return out.toString();
+    }
+
+    /**
+     * fill header style
+     *
+     * @return String header
+     */
+    private String insertHeaderStyle() {
+        StringBuilder out = new StringBuilder();
+        StringBuilder separate = new StringBuilder();
 
         Stream.generate(() -> "-")
                 .limit(5)
@@ -213,12 +232,6 @@ public class Server {
                 .forEach(separate::append);
         out.append(separate.toString()).append("\n");
         separate.setLength(0);
-
-
-        for (Client client : clients)
-            out.append(client.toString()).append("\n");
-
-
         return out.toString();
     }
 
@@ -231,5 +244,36 @@ public class Server {
         for (Client client : clients) {
             client.send("\nserver say:" + message);
         }
+    }
+
+    /**
+     * method to display all groups
+     *
+     * @return String contain all groups
+     */
+    String displayGroups(Client beneficiary) {
+        if (groups.size() == 0)
+            return "sorry no group created on this server";
+
+        StringBuilder out = new StringBuilder();
+        StringBuilder separate = new StringBuilder();
+
+        out.append("\ngroups\n");
+        Stream.generate(() -> "=")
+                .limit(15)
+                .forEach(separate::append);
+
+        out.append(String.format("%-23s", separate.toString())).append("\n").append("\n");
+
+        separate.setLength(0);
+
+
+        out.append(String.format("%-15s%-35s%-35s%-15s", "id", "group name", "administrator", "joined")).append("\n");
+        out.append(insertHeaderStyle());
+
+        for (Group group : groups)
+            out.append(group.toString(beneficiary)).append("\n");
+
+        return out.toString();
     }
 }

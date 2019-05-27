@@ -10,29 +10,42 @@ public class Group {
     private static int counter = 1;
     private int id;
     private String name;
-    private Vector<Client> clients;
+    private Client administrator;
+    private Vector<Client> members;
 
 
-    Group(String name) {
+    Group(String name, Client admin) {
         id = counter++;
         this.name = name;
-        clients = new Vector<>();
+        administrator = admin;
+        members = new Vector<>();
     }
 
     /**
      * get id of group
+     *
      * @return int id of group
      */
-    int getId(){
+    int getId() {
         return id;
     }
 
     /**
      * get name of group
+     *
      * @return String name of group
      */
-    String getName(){
+    String getName() {
         return name;
+    }
+
+    /**
+     * get administrator of group
+     *
+     * @return Client represent administrator of group
+     */
+    Client getAdministrator() {
+        return administrator;
     }
 
     /**
@@ -41,10 +54,10 @@ public class Group {
      * @param newClient Client to be added
      */
     void addClient(Client newClient) {
-        clients.add(newClient);
-        for (Client client : clients) {
+        members.add(newClient);
+        for (Client client : members) {
             if (!client.equals(newClient))
-                client.send(newClient.getHostName()+" enter group.");
+                client.send(newClient.getHostName() + " enter group.");
         }
     }
 
@@ -54,22 +67,31 @@ public class Group {
      * @param deletedClient Client to be deleted
      */
     void removeClient(Client deletedClient) {
-        clients.remove(deletedClient);
-        for (Client client : clients) {
+        members.remove(deletedClient);
+        for (Client client : members) {
             if (!client.equals(deletedClient))
-                client.send(deletedClient.getHostName()+" left group.");
+                client.send(deletedClient.getHostName() + " left group.");
         }
     }
 
     /**
      * method used to send message foreach user connected to the group
-     * @param sender Client who send the message
+     *
+     * @param sender  Client who send the message
      * @param message String contain of message
      */
     void broadcast(Client sender, String message) {
-        for (Client client : clients) {
+        for (Client client : members) {
             if (!client.equals(sender))
-                client.send(sender.getHostName()+" [pc"+sender.getId()+"] say:"+message);
+                client.send(sender.getHostName() + " [pc" + sender.getId() + "] say:" + message);
         }
+    }
+
+    public String toString() {
+        return String.format("%-15s%-35s%-35s", id, name, administrator.getHostName());
+    }
+
+    public String toString(Client c) {
+        return String.format("%-15s%-35s%-35s%-15s", id, name, administrator.getHostName(), members.contains(c));
     }
 }

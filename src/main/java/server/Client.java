@@ -87,7 +87,7 @@ public class Client implements Comparable<Client> {
                     if (cmd != null) {
                         switch (cmd) {
                             case CLIENTS:
-                                bridge.put(server.getClients());
+                                bridge.put(server.displayClients());
                                 break;
                             case QUIT:
                                 server.removeClient(this, false);
@@ -113,6 +113,11 @@ public class Client implements Comparable<Client> {
 
                                     }
                                 }
+                                break;
+
+                            case LIST_GROUPS:
+                                if (command.length == 2)
+                                    bridge.put(server.displayGroups(this));
                                 break;
                         }
                     }

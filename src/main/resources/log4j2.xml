@@ -7,7 +7,7 @@
 
     <Appenders>
         <Console name="console" target="SYSTEM_OUT" follow="true" >
-            <PatternLayout pattern="%date{yyyy-MM-dd HH:mm:ss} | %highlight{%5level}  --- [%15thread] %style{%logger{1.}}{normal, cyan} %C{2} (%F:%L) : %message%n%throwable%n"/>
+            <PatternLayout pattern="%date{yyyy-MM-dd HH:mm:ss} | %highlight{%5level}  ----- [%style{%logger{1.}}{normal, cyan}]  ----- [message] %message%n%throwable%n"/>
         </Console>
 
         <File name="file" fileName="logger.log" immediateFlush="false" append="false">
