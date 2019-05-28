@@ -100,7 +100,7 @@ public class Client implements Comparable<Client> {
 
                                 break;
                             case CHAT_WITH_USER:
-                                if (command.length == 3) {
+                                if (command.length >= 3) {
                                     //parse id of pc
                                     Matcher matcher = Validation.CLIENT.getPattern().matcher(command[1]);
                                     if (matcher.matches()) {
@@ -108,8 +108,11 @@ public class Client implements Comparable<Client> {
                                         int partnerId = Integer.parseInt(pcs[1]);
                                         if (partnerId != id) {
                                             Client c = server.getClientById(partnerId);
+                                            StringBuilder message = new StringBuilder();
+                                            for (int i = 2; i < command.length; i++)
+                                                message.append(command[i]).append(" ");
                                             if (c != null)
-                                                c.send(getHostName() + " [pc" + id + "] say:" + command[2]);
+                                                c.send(getHostName() + " [pc" + id + "] say:" + message.toString());
                                         }
 
                                     }
@@ -119,15 +122,20 @@ public class Client implements Comparable<Client> {
                             case LIST_GROUPS:
                                 bridge.put(server.displayGroups(this));
                                 break;
+
                             case CREATE_GROUP:
                                 if (command.length == 2) {
-                                    if (server.addGroup(new Group(command[1], this)))
+                                    if (server.addGroup(new Group(command[1], this))) {
                                         System.out.println("\nnew group added");
-                                    else
+                                        bridge.put("new group added");
+                                    } else {
                                         System.out.println("\nproblem occur when create new group");
+                                        bridge.put("problem occur when create new group");
+                                    }
                                     startPrefix();
                                 }
                                 break;
+
                             case JOIN_GROUP:
                                 if (command.length == 2) {
                                     if (server.joinGroup(this, command[1]))
@@ -136,6 +144,7 @@ public class Client implements Comparable<Client> {
                                         bridge.put("join unsuccessful to " + command[1]);
                                 }
                                 break;
+
                             case EXIT_GROUP:
                                 if (command.length == 2)
                                     if (server.exitGroup(this, command[1]))
@@ -143,6 +152,7 @@ public class Client implements Comparable<Client> {
                                     else
                                         bridge.put("exit unsuccessful to " + command[1]);
                                 break;
+
                             case DELETE_GROUP:
                                 if (command.length == 2)
                                     if (server.removeGroup(this, command[1]))
@@ -151,13 +161,20 @@ public class Client implements Comparable<Client> {
                                         bridge.put("we could not delete group" + command[1]);
                                 break;
                             case CHAT_ON_GROUP:
-                                if (command.length == 3) {
-                                    String[] groupTarget = command[1].split("grp");
-                                    int groupId = Integer.parseInt(groupTarget[1]);
-                                    Group group = server.getGroupById(groupId);
+                                if (command.length >= 3) {
+                                    //parse id of group
+                                    Matcher matcher = Validation.GROUP.getPattern().matcher(command[1]);
+                                    if (matcher.matches()) {
+                                        String[] groupTarget = command[1].split("grp");
+                                        int groupId = Integer.parseInt(groupTarget[1]);
+                                        Group group = server.getGroupById(groupId);
 
-                                    if (group != null)
-                                        group.broadcast(this, command[2]);
+                                        StringBuilder message = new StringBuilder();
+                                        for (int i = 2; i < command.length; i++)
+                                            message.append(command[i]).append(" ");
+                                        if (group != null)
+                                            group.broadcast(this, message.toString());
+                                    }
                                 }
                                 break;
                             case SEND_FILE:
@@ -179,6 +196,16 @@ public class Client implements Comparable<Client> {
                                             }
                                         }
                                     }
+                                }
+                                break;
+
+                            case MEMBERS_OF_GROUP:
+                                if (command.length == 2) {
+                                    Group group = server.getGroup(command[1]);
+                                    if (group != null)
+                                        bridge.put(group.displayMembers());
+                                    else
+                                        bridge.put("sorry not found!");
                                 }
                                 break;
                         }

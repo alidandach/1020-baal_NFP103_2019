@@ -1,6 +1,7 @@
 package server;
 
 import java.util.Vector;
+import java.util.stream.Stream;
 
 /**
  * @author Ali Dandach
@@ -55,14 +56,20 @@ public class Group implements Comparable<Group> {
     /**
      * method used to add newClient to group
      *
-     * @param newClient Client to be added
+     * @param newClient client to be added
+     *
+     * @return if add successful return true
      */
-    void addClient(Client newClient) {
+    boolean addClient(Client newClient) {
+        if(isAdministrator(newClient) ||members.contains(newClient))
+            return false;
+
         members.add(newClient);
         for (Client client : members) {
             if (!client.equals(newClient))
                 client.send(newClient.getHostName() + " enter group.");
         }
+        return true;
     }
 
     /**
@@ -85,19 +92,70 @@ public class Group implements Comparable<Group> {
      * @param message String contain of message
      */
     void broadcast(Client sender, String message) {
+        if (!isAdministrator(sender))
+            administrator.send("from group "+name+":"+sender.getHostName() + " [pc" + sender.getId() + "] say:" + message);
         for (Client client : members) {
             if (!client.equals(sender))
-                client.send(sender.getHostName() + " [pc" + sender.getId() + "] say:" + message);
+                client.send("from group "+name+":"+sender.getHostName() + " [pc" + sender.getId() + "] say:" + message);
         }
     }
 
     /**
      * method used to destroy group
-     *
      */
-    void destroy(){
+    void destroy() {
         for (Client member : members)
             member.send(" group is deleted by the owner.");
+    }
+
+    /**
+     * method used to display all members of
+     *
+     * @return String of data
+     */
+    String displayMembers() {
+        if (members.size() == 0)
+            return "sorry no members in this group";
+
+        StringBuilder out = new StringBuilder();
+        StringBuilder separate = new StringBuilder();
+
+        out.append("\nmembers\n");
+        Stream.generate(() -> "=")
+                .limit(10)
+                .forEach(separate::append);
+
+        out.append(String.format("%-23s", separate.toString())).append("\n").append("\n");
+
+        separate.setLength(0);
+
+
+        out.append("administrator is ");
+        out.append(administrator.getHostName());
+        out.append("\n");
+
+
+
+        out.append(String.format("%-10s%-35s", "id", "member name")).append("\n");
+
+        Stream.generate(() -> "-")
+                .limit(5)
+                .forEach(separate::append);
+        out.append(String.format("%-10s", separate.toString()));
+        separate.setLength(0);
+
+        Stream.generate(() -> "-")
+                .limit(15)
+                .forEach(separate::append);
+        out.append(String.format("%-35s", separate.toString()));
+        separate.setLength(0);
+
+        out.append("\n");
+        for (Client member : members) {
+            out.append(String.format("%-10s%-35s",member.getId(),member.getHostName())).append("\n");
+        }
+
+        return out.toString();
     }
 
     public String toString() {
@@ -105,7 +163,7 @@ public class Group implements Comparable<Group> {
     }
 
     String toString(Client c) {
-        return String.format("%-15s%-35s%-35s%-15s", id, name, administrator.getHostName(), members.contains(c));
+        return String.format("%-15s%-35s%-35s%-15s", id, name, administrator.getHostName(), members.contains(c) || isAdministrator(c));
     }
 
     @Override

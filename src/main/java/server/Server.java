@@ -116,7 +116,7 @@ public class Server {
      */
     synchronized void addClient(Client c) {
         for (Client client : clients)
-            client.send("\nserver say:new user online!");
+            client.send("server say:new user online!");
 
         clients.add(c);
     }
@@ -242,7 +242,7 @@ public class Server {
      */
     private void broadcast(String message) {
         for (Client client : clients) {
-            client.send("\nserver say:" + message);
+            client.send("server say:" + message);
         }
     }
 
@@ -282,7 +282,7 @@ public class Server {
      * @param groupName String name of group
      * @return if founded return group else return null
      */
-    private Group getGroup(String groupName) {
+     Group getGroup(String groupName) {
         Group out = null;
         for (Group group : groups) {
             if (group.getName().equals(groupName)) {
@@ -311,10 +311,9 @@ public class Server {
      * @param groupName String name of group
      */
     boolean joinGroup(Client client, String groupName) {
-        Group group = getGroup(groupName);
+        Group group=getGroup(groupName);
         if (group != null) {
-            group.addClient(client);
-            return true;
+            return group.addClient(client);
         } else
             return false;
 
@@ -350,7 +349,7 @@ public class Server {
 
         out.append("\ngroups\n");
         Stream.generate(() -> "=")
-                .limit(15)
+                .limit(10)
                 .forEach(separate::append);
 
         out.append(String.format("%-23s", separate.toString())).append("\n").append("\n");

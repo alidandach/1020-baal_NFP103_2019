@@ -115,13 +115,10 @@ class Network {
                     //clear response
                     response.setLength(0);
                 }
-            } catch (IOException e) {
-                System.out.println();
-                logger.error("IO exception in receiver thread\t----->\t" + e.getMessage());
-            } catch (InterruptedException e) {
-                System.out.println();
-                logger.error("Interrupted exception in receiver thread\t----->\t" + e.getMessage());
-            } finally {
+            } catch (IOException | InterruptedException e) {
+
+            }
+            finally {
                 try {
                     if (first)
                         System.out.println();

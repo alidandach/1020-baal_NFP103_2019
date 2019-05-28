@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public enum Command {
     CLIENTS("both", "core", "who", "List all clients connected to server"),
-    CONNECT("client", "core", "connect", "Connect to the server ex: connect -u root -p yourPassword -h 192.168.0.10:5555"),
+    CONNECT("client", "core", "connect", "Connect to the server ex: connect -u root -p root -h 192.168.0.10:5555"),
     HELP("both", "core", "help", "Print a help message"),
     KILL("server", "core", "kill", "kill user ex: kill pc1"),
     QUIT("both", "core", "quit", "Exit"),
@@ -16,6 +16,7 @@ public enum Command {
     EXIT_GROUP("client", "group", "exit_grp", "exit group ex: exit_grp nameOfGroup"),
     JOIN_GROUP("client", "group", "join_grp", "join group ex: join_grp nameOfGroup"),
     LIST_GROUPS("both", "group", "list_grp", "list all groups founded on the server"),
+    MEMBERS_OF_GROUP("both", "group", "members", "list all members in groups ex: members nameOfGroup"),
     SEND_FILE("client", "file", "send_to", "send file to someone connected to the server ex: send_to pc1 pathOfYourFile");
 
     private String side;

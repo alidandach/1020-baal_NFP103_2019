@@ -87,6 +87,26 @@ public class KeyBoardInput extends Thread {
                         startPrefix();
                         break;
 
+                    case LIST_GROUPS:
+                        if (!server.isStarted())
+                            System.out.println("sorry...you must to start listening on a specific port");
+                        else
+                            System.out.println(server.displayGroups(null));
+                        startPrefix();
+                        break;
+                    case MEMBERS_OF_GROUP:
+                        if (!server.isStarted())
+                            System.out.println("sorry...you must to start listening on a specific port");
+                        else {
+                            Group group = server.getGroup(command[1]);
+                            if (group != null)
+                                System.out.println(group.displayMembers());
+                            else
+                                System.out.println("sorry group not found!");
+                        }
+                        startPrefix();
+                        break;
+
                     case QUIT:
                         server.shutdown();
                         break;

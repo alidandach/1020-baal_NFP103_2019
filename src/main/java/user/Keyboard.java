@@ -100,9 +100,26 @@ public class Keyboard extends Thread {
                             break;
                         case CHAT_WITH_USER:
                             if (user.isConnected()) {
-                                if (command.length == 3) {
+                                if (command.length >= 3) {
                                     //parse id of pc
                                     Matcher matcher = Validation.CLIENT.getPattern().matcher(command[1]);
+                                    if (matcher.matches()) {
+                                        String s = Arrays.toString(command);
+                                        user.produce(s.substring(1, s.length() - 1).replace(",", ""));
+                                    } else
+                                        errorMessage();
+                                } else
+                                    errorMessage();
+                            } else
+                                System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
+
+                            startPrefix();
+                            break;
+                        case CHAT_ON_GROUP:
+                            if (user.isConnected()) {
+                                if (command.length >= 3) {
+                                    //parse id of pc
+                                    Matcher matcher = Validation.GROUP.getPattern().matcher(command[1]);
                                     if (matcher.matches()) {
                                         String s = Arrays.toString(command);
                                         user.produce(s.substring(1, s.length() - 1).replace(",", ""));
@@ -121,10 +138,11 @@ public class Keyboard extends Thread {
                                     user.produce(Command.CREATE_GROUP.getCommand() + " " + command[1]);
                                 } else
                                     errorMessage();
-                            } else
+                            } else {
                                 System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
+                                startPrefix();
+                            }
 
-                            startPrefix();
                             break;
                         case JOIN_GROUP:
                             if (user.isConnected()) {
@@ -132,9 +150,11 @@ public class Keyboard extends Thread {
                                     user.produce(Command.JOIN_GROUP.getCommand() + " " + command[1]);
                                 } else
                                     errorMessage();
-                            } else
+                            } else {
                                 System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
-                            startPrefix();
+                                startPrefix();
+                            }
+
                             break;
                         case EXIT_GROUP:
                             if (user.isConnected()) {
@@ -142,9 +162,11 @@ public class Keyboard extends Thread {
                                     user.produce(Command.EXIT_GROUP.getCommand() + " " + command[1]);
                                 } else
                                     errorMessage();
-                            } else
+                            } else {
                                 System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
-                            startPrefix();
+                                startPrefix();
+                            }
+
                             break;
                         case DELETE_GROUP:
                             if (user.isConnected()) {
@@ -152,16 +174,27 @@ public class Keyboard extends Thread {
                                     user.produce(Command.DELETE_GROUP.getCommand() + " " + command[1]);
                                 } else
                                     errorMessage();
-                            } else
+                            } else {
                                 System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
-                            startPrefix();
+                                startPrefix();
+                            }
+
                             break;
                         case LIST_GROUPS:
                             if (user.isConnected()) {
                                 user.produce(Command.LIST_GROUPS.getCommand());
-                            } else
+                            } else {
                                 System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
-                            startPrefix();
+                                startPrefix();
+                            }
+                            break;
+                        case MEMBERS_OF_GROUP:
+                            if (user.isConnected())
+                                user.produce(command[0] + " " + command[1]);
+                            else {
+                                System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
+                                startPrefix();
+                            }
                             break;
                         case SEND_FILE:
                             if (user.isConnected()) {
