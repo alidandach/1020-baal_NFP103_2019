@@ -7,8 +7,10 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
- class Network {
+class Network {
     private User user;
     private volatile boolean connected;
     private volatile boolean first;
@@ -99,7 +101,13 @@ import java.net.Socket;
                         return;
                     }
 
-                    System.out.print(response);
+                    //Maybe file in form of byte
+                    String[] file = response.toString().split("0xff");
+                    if (file.length == 3) {
+                        Files.write(Paths.get(file[0] + "." + file[2]), file[1].getBytes());
+                        System.out.println("new file received");
+                    } else
+                        System.out.print(response);
 
                     //adjusting console
                     startPrefix();
@@ -147,7 +155,7 @@ import java.net.Socket;
         disconnectFromKeyboard = true;
     }
 
-    private void startPrefix(){
+    private void startPrefix() {
         System.out.print(prefix);
     }
 

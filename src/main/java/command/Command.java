@@ -3,19 +3,20 @@ package command;
 import java.util.ArrayList;
 
 public enum Command {
-    CLIENTS("both", "core","who", "List all clients connected to server"),
-    CONNECT("client","core", "connect", "Connect to the server ex: connect -u root -p yourPassword -h 192.168.0.10:5555"),
-    HELP("both", "core","help", "Print a help message"),
-    KILL("server", "core","kill", "kill user ex: kill pc1"),
-    QUIT("both", "core","quit", "Exit"),
-    START("server", "core","start", "Configure a machine to listen on a specific port ex: start 5555"),
-    CHAT_WITH_USER("client", "chat","usr", "chat with another user ex: usr pc1 message"),
-    CREATE_GROUP("client","group","create_grp","create group ex: create_grp nameOfYourGroup"),
-    DELETE_GROUP("both","group","delete_grp","delete group if you are admin of group ex: delete_grp nameOfGroup"),
-    EXIT_GROUP("client","group","exit_grp","exit group ex: exit_grp nameOfGroup"),
-    JOIN_GROUP("client","group","join_grp","join group ex: join_grp nameOfGroup"),
-    LIST_GROUPS("both","group","list_grp","list all groups founded on the server"),
-    SEND_FILE("client","file","send","send file to some one connected to the server");
+    CLIENTS("both", "core", "who", "List all clients connected to server"),
+    CONNECT("client", "core", "connect", "Connect to the server ex: connect -u root -p yourPassword -h 192.168.0.10:5555"),
+    HELP("both", "core", "help", "Print a help message"),
+    KILL("server", "core", "kill", "kill user ex: kill pc1"),
+    QUIT("both", "core", "quit", "Exit"),
+    START("server", "core", "start", "Configure a machine to listen on a specific port ex: start 5555"),
+    CHAT_WITH_USER("client", "chat", "to_usr", "chat with another user ex: to_usr pc1 message"),
+    CHAT_ON_GROUP("client", "chat", "to_group", "chat with on group ex: to_group grp1 message"),
+    CREATE_GROUP("client", "group", "create_grp", "create group ex: create_grp nameOfYourGroup"),
+    DELETE_GROUP("both", "group", "delete_grp", "delete group if you are admin of group ex: delete_grp nameOfGroup"),
+    EXIT_GROUP("client", "group", "exit_grp", "exit group ex: exit_grp nameOfGroup"),
+    JOIN_GROUP("client", "group", "join_grp", "join group ex: join_grp nameOfGroup"),
+    LIST_GROUPS("both", "group", "list_grp", "list all groups founded on the server"),
+    SEND_FILE("client", "file", "send_to", "send file to someone connected to the server ex: send_to pc1 pathOfYourFile");
 
     private String side;
     private String functionality;
@@ -50,52 +51,57 @@ public enum Command {
         return null;
     }
 
-    public static Command[] byFunctionality(String type){
-        switch (type){
-            case "core":return core();
-            case "chat":return chat();
-            case "group":return group();
-            case "file":return file();
-            default: return null;
+    public static Command[] byFunctionality(String type) {
+        switch (type) {
+            case "core":
+                return core();
+            case "chat":
+                return chat();
+            case "group":
+                return group();
+            case "file":
+                return file();
+            default:
+                return null;
         }
     }
 
-    public static Command[] core(){
-        Command[] commands=Command.values();
-        ArrayList<Command> out=new ArrayList<>();
+    public static Command[] core() {
+        Command[] commands = Command.values();
+        ArrayList<Command> out = new ArrayList<>();
 
         for (Command command : commands)
-            if(command.functionality.equals("core"))
+            if (command.functionality.equals("core"))
                 out.add(command);
         return out.toArray(new Command[out.size()]);
     }
 
-    public static Command[] chat(){
-        Command[] commands=Command.values();
-        ArrayList<Command> out=new ArrayList<>();
+    public static Command[] chat() {
+        Command[] commands = Command.values();
+        ArrayList<Command> out = new ArrayList<>();
 
         for (Command command : commands)
-            if(command.functionality.equals("chat"))
+            if (command.functionality.equals("chat"))
                 out.add(command);
         return out.toArray(new Command[out.size()]);
     }
 
-    public static Command[] group(){
-        Command[] commands=Command.values();
-        ArrayList<Command> out=new ArrayList<>();
+    public static Command[] group() {
+        Command[] commands = Command.values();
+        ArrayList<Command> out = new ArrayList<>();
 
         for (Command command : commands)
-            if(command.functionality.equals("group"))
+            if (command.functionality.equals("group"))
                 out.add(command);
         return out.toArray(new Command[out.size()]);
     }
 
-    public static Command[] file(){
-        Command[] commands=Command.values();
-        ArrayList<Command> out=new ArrayList<>();
+    public static Command[] file() {
+        Command[] commands = Command.values();
+        ArrayList<Command> out = new ArrayList<>();
 
         for (Command command : commands)
-            if(command.functionality.equals("file"))
+            if (command.functionality.equals("file"))
                 out.add(command);
         return out.toArray(new Command[out.size()]);
     }

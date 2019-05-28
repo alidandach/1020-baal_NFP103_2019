@@ -12,6 +12,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 
 public class Client implements Comparable<Client> {
@@ -116,8 +117,69 @@ public class Client implements Comparable<Client> {
                                 break;
 
                             case LIST_GROUPS:
+                                bridge.put(server.displayGroups(this));
+                                break;
+                            case CREATE_GROUP:
+                                if (command.length == 2) {
+                                    if (server.addGroup(new Group(command[1], this)))
+                                        System.out.println("\nnew group added");
+                                    else
+                                        System.out.println("\nproblem occur when create new group");
+                                    startPrefix();
+                                }
+                                break;
+                            case JOIN_GROUP:
+                                if (command.length == 2) {
+                                    if (server.joinGroup(this, command[1]))
+                                        bridge.put("join successful to " + command[1]);
+                                    else
+                                        bridge.put("join unsuccessful to " + command[1]);
+                                }
+                                break;
+                            case EXIT_GROUP:
                                 if (command.length == 2)
-                                    bridge.put(server.displayGroups(this));
+                                    if (server.exitGroup(this, command[1]))
+                                        bridge.put("exit successful to " + command[1]);
+                                    else
+                                        bridge.put("exit unsuccessful to " + command[1]);
+                                break;
+                            case DELETE_GROUP:
+                                if (command.length == 2)
+                                    if (server.removeGroup(this, command[1]))
+                                        bridge.put("delete group" + command[1]);
+                                    else
+                                        bridge.put("we could not delete group" + command[1]);
+                                break;
+                            case CHAT_ON_GROUP:
+                                if (command.length == 3) {
+                                    String[] groupTarget = command[1].split("grp");
+                                    int groupId = Integer.parseInt(groupTarget[1]);
+                                    Group group = server.getGroupById(groupId);
+
+                                    if (group != null)
+                                        group.broadcast(this, command[2]);
+                                }
+                                break;
+                            case SEND_FILE:
+                                if (command.length == 3) {
+                                    //parse id of pc
+                                    Matcher matcher = Validation.CLIENT.getPattern().matcher(command[1]);
+                                    if (matcher.matches()) {
+                                        String[] pcs = command[1].split("pc");
+                                        int partnerId = Integer.parseInt(pcs[1]);
+                                        if (partnerId != id) {
+                                            Client c = server.getClientById(partnerId);
+                                            if (c != null) {
+                                                long hour = TimeUnit.MILLISECONDS.toHours(System.currentTimeMillis());
+                                                long minute = TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis());
+                                                long second = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
+                                                String[] file = command[2].split(".");
+                                                String extension = file[1];
+                                                c.send("pc" + this.id + String.format("%02d:%02d:%02d", hour, minute, second) + "0xff" + command[1] + "0xff" + extension);
+                                            }
+                                        }
+                                    }
+                                }
                                 break;
                         }
                     }
@@ -235,8 +297,6 @@ public class Client implements Comparable<Client> {
         if (!Client.class.isAssignableFrom(obj.getClass()))
             return false;
 
-        final Client c = (Client) obj;
-
-        return id == c.getId();
+        return id == ((Client) obj).getId();
     }
 }

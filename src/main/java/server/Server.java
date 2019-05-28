@@ -247,6 +247,96 @@ public class Server {
     }
 
     /**
+     * method used to add new group
+     *
+     * @param grp Group to be added
+     * @return boolean true if added successful
+     */
+    boolean addGroup(Group grp) {
+        return groups.add(grp);
+    }
+
+    /**
+     * method used to delete group
+     *
+     * @param client    owner of group if null delete from server
+     * @param groupName String name of group
+     * @return true if deleted successful
+     */
+    boolean removeGroup(Client client, String groupName) {
+        Group group = getGroup(groupName);
+        if (group != null) {
+            if (client == null || group.isAdministrator(client)) {
+                group.destroy();
+                groups.remove(group);
+                return true;
+
+            } else return false;
+        } else
+            return false;
+    }
+
+    /**
+     * method to get specific group
+     *
+     * @param groupName String name of group
+     * @return if founded return group else return null
+     */
+    private Group getGroup(String groupName) {
+        Group out = null;
+        for (Group group : groups) {
+            if (group.getName().equals(groupName)) {
+                out = group;
+                break;
+            }
+        }
+        return out;
+    }
+
+    Group getGroupById(int groupId) {
+        Group out = null;
+        for (Group group : groups) {
+            if (group.getId() == groupId) {
+                out = group;
+                break;
+            }
+        }
+        return out;
+    }
+
+    /**
+     * method used to join client on specific group
+     *
+     * @param client    Client to be added
+     * @param groupName String name of group
+     */
+    boolean joinGroup(Client client, String groupName) {
+        Group group = getGroup(groupName);
+        if (group != null) {
+            group.addClient(client);
+            return true;
+        } else
+            return false;
+
+    }
+
+    /**
+     * method This method is used to exit the client from the group
+     *
+     * @param client    to be removed from group
+     * @param groupName String name of group
+     * @return true if successful exit group
+     */
+    boolean exitGroup(Client client, String groupName) {
+        Group group = getGroup(groupName);
+        if (group != null) {
+            group.removeClient(client);
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * method to display all groups
      *
      * @return String contain all groups

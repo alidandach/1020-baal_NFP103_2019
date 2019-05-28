@@ -6,7 +6,7 @@ import java.util.Vector;
  * @author Ali Dandach
  * Date 10/05/2019
  */
-public class Group {
+public class Group implements Comparable<Group> {
     private static int counter = 1;
     private int id;
     private String name;
@@ -48,6 +48,10 @@ public class Group {
         return administrator;
     }
 
+    boolean isAdministrator(Client client) {
+        return administrator.equals(client);
+    }
+
     /**
      * method used to add newClient to group
      *
@@ -87,11 +91,36 @@ public class Group {
         }
     }
 
+    /**
+     * method used to destroy group
+     *
+     */
+    void destroy(){
+        for (Client member : members)
+            member.send(" group is deleted by the owner.");
+    }
+
     public String toString() {
         return String.format("%-15s%-35s%-35s", id, name, administrator.getHostName());
     }
 
-    public String toString(Client c) {
+    String toString(Client c) {
         return String.format("%-15s%-35s%-35s%-15s", id, name, administrator.getHostName(), members.contains(c));
+    }
+
+    @Override
+    public int compareTo(Group o) {
+        return name.compareTo(o.getName());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this)
+            return true;
+
+        if (!Group.class.isAssignableFrom(obj.getClass()))
+            return false;
+
+        return ((Group) obj).compareTo(this) == 0;
     }
 }
