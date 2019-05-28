@@ -107,6 +107,18 @@ public class KeyBoardInput extends Thread {
                         startPrefix();
                         break;
 
+                    case DELETE_GROUP:
+                        if (!server.isStarted())
+                            System.out.println("sorry...you must to start listening on a specific port");
+                        else {
+                            if (server.removeGroup(null, command[1],true))
+                                System.out.println(command[1] + " deleted");
+                            else
+                                System.out.println("sorry group not found!");
+                        }
+                        startPrefix();
+                        break;
+
                     case QUIT:
                         server.shutdown();
                         break;

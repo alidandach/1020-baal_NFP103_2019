@@ -57,17 +57,17 @@ public class Group implements Comparable<Group> {
      * method used to add newClient to group
      *
      * @param newClient client to be added
-     *
      * @return if add successful return true
      */
     boolean addClient(Client newClient) {
-        if(isAdministrator(newClient) ||members.contains(newClient))
+        if (isAdministrator(newClient) || members.contains(newClient))
             return false;
 
         members.add(newClient);
+        administrator.send(newClient.getHostName() + " enter " + name + " group.");
         for (Client client : members) {
             if (!client.equals(newClient))
-                client.send(newClient.getHostName() + " enter group.");
+                client.send(newClient.getHostName() + " enter " + name + " group.");
         }
         return true;
     }
@@ -86,6 +86,17 @@ public class Group implements Comparable<Group> {
     }
 
     /**
+     * method used to check if client member inside group
+     *
+     * @param client to be checked
+     *
+     * @return boolean if true client exist inside group
+     */
+    boolean isMember(Client client) {
+        return members.contains(client);
+    }
+
+    /**
      * method used to send message foreach user connected to the group
      *
      * @param sender  Client who send the message
@@ -93,19 +104,24 @@ public class Group implements Comparable<Group> {
      */
     void broadcast(Client sender, String message) {
         if (!isAdministrator(sender))
-            administrator.send("from group "+name+":"+sender.getHostName() + " [pc" + sender.getId() + "] say:" + message);
+            administrator.send("from group " + name + ":" + sender.getHostName() + " [pc" + sender.getId() + "] say:" + message);
         for (Client client : members) {
             if (!client.equals(sender))
-                client.send("from group "+name+":"+sender.getHostName() + " [pc" + sender.getId() + "] say:" + message);
+                client.send("from group " + name + ":" + sender.getHostName() + " [pc" + sender.getId() + "] say:" + message);
         }
     }
 
     /**
      * method used to destroy group
+     *
+     * @param fromServer if true destroy of group is from server
      */
-    void destroy() {
+    void destroy(boolean fromServer) {
         for (Client member : members)
-            member.send(" group is deleted by the owner.");
+            if (!fromServer)
+                member.send(name+" group is deleted by the owner.");
+            else
+                member.send(name+" group is deleted by the administrator of server.");
     }
 
     /**
@@ -133,7 +149,7 @@ public class Group implements Comparable<Group> {
         out.append("administrator is ");
         out.append(administrator.getHostName());
         out.append("\n");
-
+        out.append("\n");
 
 
         out.append(String.format("%-10s%-35s", "id", "member name")).append("\n");
@@ -152,7 +168,7 @@ public class Group implements Comparable<Group> {
 
         out.append("\n");
         for (Client member : members) {
-            out.append(String.format("%-10s%-35s",member.getId(),member.getHostName())).append("\n");
+            out.append(String.format("%-10s%-35s", member.getId(), member.getHostName())).append("\n");
         }
 
         return out.toString();

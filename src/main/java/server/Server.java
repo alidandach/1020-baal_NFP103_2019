@@ -263,11 +263,11 @@ public class Server {
      * @param groupName String name of group
      * @return true if deleted successful
      */
-    boolean removeGroup(Client client, String groupName) {
+    boolean removeGroup(Client client, String groupName, boolean fromServer) {
         Group group = getGroup(groupName);
         if (group != null) {
             if (client == null || group.isAdministrator(client)) {
-                group.destroy();
+                group.destroy(fromServer);
                 groups.remove(group);
                 return true;
 
@@ -282,7 +282,7 @@ public class Server {
      * @param groupName String name of group
      * @return if founded return group else return null
      */
-     Group getGroup(String groupName) {
+    Group getGroup(String groupName) {
         Group out = null;
         for (Group group : groups) {
             if (group.getName().equals(groupName)) {
@@ -311,7 +311,7 @@ public class Server {
      * @param groupName String name of group
      */
     boolean joinGroup(Client client, String groupName) {
-        Group group=getGroup(groupName);
+        Group group = getGroup(groupName);
         if (group != null) {
             return group.addClient(client);
         } else
@@ -333,6 +333,20 @@ public class Server {
             return true;
         }
         return false;
+    }
+
+    /**
+     * method used when a problem occur in connection between client and server
+     *
+     * @param client to be removed
+     */
+    void destroyClient(Client client) {
+        for (Group group : groups) {
+            if (group.isAdministrator(client))
+                group.destroy(true);
+            else if (group.isMember(client))
+                group.removeClient(client);
+        }
     }
 
     /**

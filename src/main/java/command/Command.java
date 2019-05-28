@@ -10,7 +10,7 @@ public enum Command {
     QUIT("both", "core", "quit", "Exit"),
     START("server", "core", "start", "Configure a machine to listen on a specific port ex: start 5555"),
     CHAT_WITH_USER("client", "chat", "to_usr", "chat with another user ex: to_usr pc1 message"),
-    CHAT_ON_GROUP("client", "chat", "to_group", "chat with on group ex: to_group grp1 message"),
+    CHAT_ON_GROUP("client", "group", "to_group", "chat with on group ex: to_group grp1 message"),
     CREATE_GROUP("client", "group", "create_grp", "create group ex: create_grp nameOfYourGroup"),
     DELETE_GROUP("both", "group", "delete_grp", "delete group if you are admin of group ex: delete_grp nameOfGroup"),
     EXIT_GROUP("client", "group", "exit_grp", "exit group ex: exit_grp nameOfGroup"),

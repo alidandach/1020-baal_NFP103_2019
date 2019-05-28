@@ -155,10 +155,10 @@ public class Client implements Comparable<Client> {
 
                             case DELETE_GROUP:
                                 if (command.length == 2)
-                                    if (server.removeGroup(this, command[1]))
-                                        bridge.put("delete group" + command[1]);
+                                    if (server.removeGroup(this, command[1], false))
+                                        bridge.put("delete group " + command[1]);
                                     else
-                                        bridge.put("we could not delete group" + command[1]);
+                                        bridge.put("we could not delete group " + command[1]);
                                 break;
                             case CHAT_ON_GROUP:
                                 if (command.length >= 3) {
@@ -205,29 +205,22 @@ public class Client implements Comparable<Client> {
                                     if (group != null)
                                         bridge.put(group.displayMembers());
                                     else
-                                        bridge.put("sorry not found!");
+                                        bridge.put("sorry " + command[1] + "not found!");
                                 }
                                 break;
                         }
                     }
 
                 }
-            } catch (IOException e) {
+            } catch (IOException | InterruptedException e) {
                 Interrupt();
-                newLine();
-                logger.error("IO exception in thread user\t----->\t" + e.getMessage());
-                startPrefix();
-            } catch (InterruptedException e) {
-                Interrupt();
-                newLine();
-                logger.error("Interrupted exception in thread user\t----->\t" + e.getMessage());
+                System.out.println("\nThere is a user left");
                 startPrefix();
             } finally {
                 try {
                     if (input != null)
                         input.close();
                 } catch (IOException e) {
-                    logger.error("IO exception in thread user\t----->\t" + e.getMessage());
                     startPrefix();
                 }
             }
@@ -295,6 +288,7 @@ public class Client implements Comparable<Client> {
      */
     private void Interrupt() {
         bridge.clear();
+        server.destroyClient(this);
         server.removeClient(this, false);
     }
 
