@@ -1,6 +1,6 @@
 # 1020-baal_NFP103_2019
-ACCOV project/n
-This project i did after i finished the ACCOV Cours at CNAM (Conservatoire national des arts et métiers)/n
+ACCOV project/n/r
+This project i did after i finished the ACCOV Cours at CNAM (Conservatoire national des arts et métiers)/n/r
 this project is similar to IRC (Internet Relay Chat).It is desired to create a client / server system that makes it possible to communicate with several simultaneously onthe network.
 /n/r
 Client side:/n
