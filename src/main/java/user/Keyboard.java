@@ -7,8 +7,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import validation.Validation;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.util.Arrays;
@@ -70,17 +72,24 @@ public class Keyboard extends Thread {
 
                                         Matcher matcher = Validation.CONNECT.getPattern().matcher(request.toString().trim());
                                         if (matcher.matches()) {
-                                            //String username=command[2];
-                                            //String password=command[4];
+                                            String username = command[2];
+                                            String password = command[4];
 
                                             String[] host = command[6].split(":");
                                             String ip = host[0];
                                             String port = host[1];
 
                                             user.clearBridge();
-                                            user.produce(Command.CONNECT.getCommand());
-                                            user.setSocket(new Socket(ip, Integer.parseInt(port)));
-                                            logger.info("connected on " + ip + ":" + port);
+                                            user.produce(Command.CONNECT.getCommand() + " " + username + " " + password);
+
+                                            Socket s = new Socket(ip, Integer.parseInt(port));
+                                            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+                                            String response = in.readLine();
+                                            if (response.trim().equals("0x6e65676174697665"))
+                                                System.out.println("invalid username or password");
+                                            else
+                                                user.setSocket(s);
+
                                         } else
                                             errorMessage();
                                     } catch (IOException ignored) {

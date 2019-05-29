@@ -47,10 +47,14 @@ public class KeyBoardInput extends Thread {
             if (cmd != null) {
                 switch (cmd) {
                     case START:
-                        if (command.length == 2)
-                            System.out.println(server.setPort(command[1]));
-                        else
-                            System.out.println("invalid input... \n please enter an integer between 1024> and <65536");
+                        if (command.length == 2) {
+                            Matcher matcherPort = Validation.PORT.getPattern().matcher(command[1]);
+                            if (matcherPort.matches())
+                                System.out.println(server.setPort(command[1]));
+                            else
+                                System.out.println("invalid input... please enter an integer between 1024> and <65536");
+                        } else
+                            System.out.println("invalid input.. please enter an integer between 1024> and <65536");
                         startPrefix();
                         break;
 
@@ -111,7 +115,7 @@ public class KeyBoardInput extends Thread {
                         if (!server.isStarted())
                             System.out.println("sorry...you must to start listening on a specific port");
                         else {
-                            if (server.removeGroup(null, command[1],true))
+                            if (server.removeGroup(null, command[1], true))
                                 System.out.println(command[1] + " deleted");
                             else
                                 System.out.println("sorry group not found!");

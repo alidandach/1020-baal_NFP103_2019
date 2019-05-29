@@ -10,6 +10,8 @@ import java.net.Socket;
 
 public class NetworkInput extends Thread {
     private Server server;
+    private static final String username = "root";
+    private static final String password = "root";
 
     NetworkInput(String n, Server s) {
         super(n);
@@ -31,17 +33,23 @@ public class NetworkInput extends Thread {
                 output = new PrintWriter(socket.getOutputStream(), true);
                 request = input.readLine();
 
+
+                String[] command = request.trim().split(" ");
+
                 //parse command
-                Command cmd = Command.getCommand(request);
+                Command cmd = Command.getCommand(command[0]);
 
                 if (cmd != null)
                     if (cmd == Command.CONNECT) {
-                        Client c = new Client(server, socket);
-                        server.addClient(c);
-                        c.send("0xee" + c.getId());
-                        System.out.println("\nnew user is connected.check it by typing " + Command.CLIENTS.getCommand() + " command");
-                        System.out.print("irc > ");
-                        socket = null;
+                        if (command.length == 3 && command[1].trim().equals(username) && command[2].trim().equals(password)) {
+                            Client c = new Client(server, socket);
+                            server.addClient(c);
+                            c.send("0xee" + c.getId());
+                            System.out.println("\nnew user is connected.check it by typing " + Command.CLIENTS.getCommand() + " command");
+                            System.out.print("irc > ");
+                            socket = null;
+                        } else
+                            output.println("0x6e65676174697665");
                     } else
                         output.println("sorry only " + Command.CONNECT.getCommand() + " and " + Command.CLIENTS.getCommand() + "commands working....");
             }

@@ -165,7 +165,7 @@ class Network {
         });
         receiver.start();
 
-        logger.info("socket is plugged");
+        logger.info("socket is plugged on " + user.getSocket().getLocalAddress().getHostAddress() + ":" + user.getSocket().getPort());
     }
 
     private byte[] convertToByte(String fileData) {
