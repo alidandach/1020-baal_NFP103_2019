@@ -7,7 +7,7 @@ Client side:<br />
 ------------<br />
 1-the client sends messages (text) to the server.<br />
 2-the client accepts the following commands typed:<br />
-&nbsp2.1.1-who:List all clients connected to server<br />
+&nbsp;2.1.1-who:List all clients connected to server<br />
 /t2.1.2-connect:Connect to the server ex: connect -u root -p root -h 192.168.0.10:5555<br />
 /t2.1.3-help:Print a help message<br />
 /t2.1.4-quit:Exit application<br />
