@@ -305,6 +305,20 @@ public class Server {
     }
 
     /**
+     * check if group exist in the server
+     *
+     * @param groupId int group id
+     *
+     * @return true if exist
+     */
+    boolean groupIsExist(int groupId) {
+        for (Group group : groups)
+            if (group.getId() == groupId)
+                return true;
+        return false;
+    }
+
+    /**
      * method used to join client on specific group
      *
      * @param client    Client to be added

@@ -7,6 +7,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 public class User {
+    private int id;
     private Socket socket;
     private Keyboard keyboard;
     private Network network;
@@ -20,6 +21,23 @@ public class User {
         running = true;
     }
 
+    /**
+     * getter for id
+     *
+     * @return int id of user
+     */
+    int getId(){
+        return id;
+    }
+
+    /**
+     * setter for id
+     *
+     * @param id int
+     */
+    void setId(int id){
+        this.id=id;
+    }
 
     /**
      * this method return the plugged socket of the user

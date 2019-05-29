@@ -4,11 +4,11 @@ package user;
 import command.Command;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import validation.Validation;
 
 import java.io.*;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.regex.Matcher;
 
 class Network {
     private User user;
@@ -92,6 +92,11 @@ class Network {
                         response.append((char) c);
                     } while (socket.getInputStream().available() > 0);
 
+                    //Maybe server send id
+                    Matcher matcher = Validation.ID.getPattern().matcher(response.toString().trim());
+
+                    //Maybe server send file in form of byte
+                    String[] file = response.toString().trim().split("0xff");
 
                     //Maybe disconnected from server
                     if (response.toString().equals(Command.QUIT.getCommand() + "\r\n")) {
@@ -99,26 +104,38 @@ class Network {
                         user.disconnect();
                         connected = false;
                         return;
-                    }
+                    } else if (matcher.matches()) {
+                        String[] ids = response.toString().trim().split("0xee");
+                        user.setId(Integer.parseInt(ids[1]));
+                    } else if (file.length == 5) {
+                        File receivedFile = new File("from_" + file[1] + "_id_" + file[2] + "_" + System.currentTimeMillis() + file[4]);
 
-                    //Maybe file in form of byte
-                    String[] file = response.toString().split("0xff");
-                    if (file.length == 3) {
-                        Files.write(Paths.get(file[0] + "." + file[2]), file[1].getBytes());
-                        System.out.println("new file received");
-                    } else
+                        boolean isCreated = receivedFile.createNewFile();
+
+                        if (isCreated) {
+                            FileOutputStream fos = new FileOutputStream(receivedFile);
+                            fos.write(convertToByte(file[3]));
+                            fos.flush();
+                            fos.close();
+                            System.out.println("new file received from " + file[1]);
+                        }
+
+                        //adjusting console
+                        startPrefix();
+                    } else {
                         System.out.print(response);
 
-                    //adjusting console
-                    startPrefix();
+                        //adjusting console
+                        startPrefix();
+                    }
+
 
                     //clear response
                     response.setLength(0);
                 }
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException | InterruptedException ignored) {
 
-            }
-            finally {
+            } finally {
                 try {
                     if (first)
                         System.out.println();
@@ -146,6 +163,15 @@ class Network {
         receiver.start();
 
         logger.info("socket is plugged");
+    }
+
+    private byte[] convertToByte(String fileData) {
+        String s = fileData.substring(1, fileData.length() - 1).trim();
+        String[] temp = s.split(",");
+        byte[] out = new byte[temp.length];
+        for (int i = 0; i < temp.length; i++)
+            out[i] = Byte.parseByte(temp[i].trim());
+        return out;
     }
 
     void disconnectFromKeyboard() {

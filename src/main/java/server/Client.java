@@ -127,10 +127,10 @@ public class Client implements Comparable<Client> {
                                 if (command.length == 2) {
                                     if (server.addGroup(new Group(command[1], this))) {
                                         System.out.println("\nnew group added");
-                                        bridge.put("new group added");
+                                        bridge.put("server say:new group added");
                                     } else {
                                         System.out.println("\nproblem occur when create new group");
-                                        bridge.put("problem occur when create new group");
+                                        bridge.put("server say:problem occur when create new group");
                                     }
                                     startPrefix();
                                 }
@@ -139,26 +139,26 @@ public class Client implements Comparable<Client> {
                             case JOIN_GROUP:
                                 if (command.length == 2) {
                                     if (server.joinGroup(this, command[1]))
-                                        bridge.put("join successful to " + command[1]);
+                                        bridge.put("server say:join successful to " + command[1]);
                                     else
-                                        bridge.put("join unsuccessful to " + command[1]);
+                                        bridge.put("server say:join unsuccessful to " + command[1]);
                                 }
                                 break;
 
                             case EXIT_GROUP:
                                 if (command.length == 2)
                                     if (server.exitGroup(this, command[1]))
-                                        bridge.put("exit successful to " + command[1]);
+                                        bridge.put("server say:exit successful to " + command[1]);
                                     else
-                                        bridge.put("exit unsuccessful to " + command[1]);
+                                        bridge.put("server say:exit unsuccessful to " + command[1]);
                                 break;
 
                             case DELETE_GROUP:
                                 if (command.length == 2)
                                     if (server.removeGroup(this, command[1], false))
-                                        bridge.put("delete group " + command[1]);
+                                        bridge.put("server say:delete group " + command[1]);
                                     else
-                                        bridge.put("we could not delete group " + command[1]);
+                                        bridge.put("server say:we could not delete group " + command[1]);
                                 break;
                             case CHAT_ON_GROUP:
                                 if (command.length >= 3) {
@@ -178,23 +178,36 @@ public class Client implements Comparable<Client> {
                                 }
                                 break;
                             case SEND_FILE:
-                                if (command.length == 3) {
+                                if (command.length > 2) {
                                     //parse id of pc
-                                    Matcher matcher = Validation.CLIENT.getPattern().matcher(command[1]);
-                                    if (matcher.matches()) {
+                                    Matcher matcherUser = Validation.CLIENT.getPattern().matcher(command[1]);
+                                    //parse id of group
+                                    Matcher matcherGroup = Validation.GROUP.getPattern().matcher(command[1]);
+
+                                    //parse file data
+                                    String[] file = request.trim().split("0xff");
+
+                                    if (matcherUser.matches()) {
                                         String[] pcs = command[1].split("pc");
                                         int partnerId = Integer.parseInt(pcs[1]);
                                         if (partnerId != id) {
                                             Client c = server.getClientById(partnerId);
                                             if (c != null) {
-                                                long hour = TimeUnit.MILLISECONDS.toHours(System.currentTimeMillis());
-                                                long minute = TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis());
-                                                long second = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
-                                                String[] file = command[2].split(".");
-                                                String extension = file[1];
-                                                c.send("pc" + this.id + String.format("%02d:%02d:%02d", hour, minute, second) + "0xff" + command[1] + "0xff" + extension);
+                                                c.send(Command.SEND_FILE.getCommand() + " 0xff" + this.getHostName() + "0xff" + this.id + "0xff" + file[1] + "0xff" + file[2]);
+                                                bridge.put("server say:file sent successfully");
                                             }
+
                                         }
+                                    } else if (matcherGroup.matches()) {
+                                        String[] groups = command[1].split("grp");
+                                        int groupId = Integer.parseInt(groups[1]);
+                                        if (server.groupIsExist(groupId)) {
+                                            Group group = server.getGroupById(groupId);
+                                            group.sendFile(this, Command.SEND_FILE.getCommand() + " 0xff" + group.getName()+ "_group"+ "_by_" + this.getHostName() + "0xff" + this.id + "0xff" + file[1] + "0xff" + file[2]);
+                                            bridge.put("server say:file sent successfully");
+                                        } else
+                                            this.send("server say:sorry this group not exist");
+
                                     }
                                 }
                                 break;
@@ -205,7 +218,7 @@ public class Client implements Comparable<Client> {
                                     if (group != null)
                                         bridge.put(group.displayMembers());
                                     else
-                                        bridge.put("sorry " + command[1] + "not found!");
+                                        bridge.put("server say:sorry " + command[1] + "not found!");
                                 }
                                 break;
                         }

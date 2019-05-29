@@ -89,7 +89,6 @@ public class Group implements Comparable<Group> {
      * method used to check if client member inside group
      *
      * @param client to be checked
-     *
      * @return boolean if true client exist inside group
      */
     boolean isMember(Client client) {
@@ -112,6 +111,20 @@ public class Group implements Comparable<Group> {
     }
 
     /**
+     * method used to sharing files on group
+     *
+     * @param sender
+     */
+    void sendFile(Client sender, String data) {
+        if (!isAdministrator(sender))
+            administrator.send(data);
+        for (Client client : members)
+            if (!client.equals(sender))
+                client.send(data);
+
+    }
+
+    /**
      * method used to destroy group
      *
      * @param fromServer if true destroy of group is from server
@@ -119,9 +132,9 @@ public class Group implements Comparable<Group> {
     void destroy(boolean fromServer) {
         for (Client member : members)
             if (!fromServer)
-                member.send(name+" group is deleted by the owner.");
+                member.send(name + " group is deleted by the owner.");
             else
-                member.send(name+" group is deleted by the administrator of server.");
+                member.send(name + " group is deleted by the administrator of server.");
     }
 
     /**

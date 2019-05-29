@@ -11,14 +11,14 @@ import java.net.Socket;
 public class NetworkInput extends Thread {
     private Server server;
 
-    public NetworkInput(String n, Server s) {
+    NetworkInput(String n, Server s) {
         super(n);
         server = s;
     }
 
     @Override
     public void run() {
-        Socket socket=null;
+        Socket socket = null;
         PrintWriter output = null;
         BufferedReader input = null;
         String request;
@@ -28,29 +28,24 @@ public class NetworkInput extends Thread {
                 //waite for new user
                 socket = server.getServerSocket().accept();
                 input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                output = new PrintWriter(socket.getOutputStream(), true);
                 request = input.readLine();
 
                 //parse command
                 Command cmd = Command.getCommand(request);
 
                 if (cmd != null)
-                    switch (cmd) {
-                        case CONNECT:
-                            server.addClient(new Client(server, socket));
-                            System.out.println("\nnew user is connected.check it by typing " + Command.CLIENTS.getCommand() + " command");
-                            System.out.print("irc > ");
-                            socket = null;
-                            break;
-                        default:
-                            server.getQueue().put("sorry only " + Command.CONNECT.getCommand() + " and " + Command.CLIENTS.getCommand() + "commands working....");
-                            break;
-                    }
-                else
-                    server.getQueue().put("sorry only " + Command.CONNECT.getCommand() + " and " + Command.CLIENTS.getCommand() + "commands working....");
+                    if (cmd == Command.CONNECT) {
+                        Client c = new Client(server, socket);
+                        server.addClient(c);
+                        c.send("0xee" + c.getId());
+                        System.out.println("\nnew user is connected.check it by typing " + Command.CLIENTS.getCommand() + " command");
+                        System.out.print("irc > ");
+                        socket = null;
+                    } else
+                        output.println("sorry only " + Command.CONNECT.getCommand() + " and " + Command.CLIENTS.getCommand() + "commands working....");
             }
         } catch (IOException e) {
-            System.out.println("problem in network thread:" + e.getMessage());
-        } catch (InterruptedException e) {
             System.out.println("problem in network thread:" + e.getMessage());
         } finally {
             try {
@@ -59,6 +54,8 @@ public class NetworkInput extends Thread {
                     socket.close();
                 if (input != null)
                     input.close();
+                if (output != null)
+                    output.close();
             } catch (IOException ioEx) {
                 System.out.println("Unable to disconnect!");
                 System.exit(1);

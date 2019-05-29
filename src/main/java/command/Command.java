@@ -3,21 +3,21 @@ package command;
 import java.util.ArrayList;
 
 public enum Command {
-    CLIENTS("both", "core", "who", "List all clients connected to server"),
+    CLIENTS("both", "core", "clients", "List all clients connected to server"),
     CONNECT("client", "core", "connect", "Connect to the server ex: connect -u root -p root -h 192.168.0.10:5555"),
     HELP("both", "core", "help", "Print a help message"),
     KILL("server", "core", "kill", "kill user ex: kill pc1"),
-    QUIT("both", "core", "quit", "Exit"),
+    QUIT("both", "core", "quit", "Exit application"),
     START("server", "core", "start", "Configure a machine to listen on a specific port ex: start 5555"),
-    CHAT_WITH_USER("client", "chat", "to_usr", "chat with another user ex: to_usr pc1 message"),
-    CHAT_ON_GROUP("client", "group", "to_group", "chat with on group ex: to_group grp1 message"),
-    CREATE_GROUP("client", "group", "create_grp", "create group ex: create_grp nameOfYourGroup"),
-    DELETE_GROUP("both", "group", "delete_grp", "delete group if you are admin of group ex: delete_grp nameOfGroup"),
-    EXIT_GROUP("client", "group", "exit_grp", "exit group ex: exit_grp nameOfGroup"),
-    JOIN_GROUP("client", "group", "join_grp", "join group ex: join_grp nameOfGroup"),
-    LIST_GROUPS("both", "group", "list_grp", "list all groups founded on the server"),
+    CHAT_WITH_USER("client", "chat", "usr", "chat with another user ex: usr pc1 message"),
+    CHAT_ON_GROUP("client", "group", "group", "chat with members group ex: group grp1 message"),
+    CREATE_GROUP("client", "group", "create", "create group ex: create nameOfYourGroup"),
+    DELETE_GROUP("both", "group", "delete", "delete group if you are admin of group ex: delete nameOfGroup"),
+    EXIT_GROUP("client", "group", "exit", "exit group ex: exit nameOfGroup"),
+    JOIN_GROUP("client", "group", "join", "join group ex: join nameOfGroup"),
+    LIST_GROUPS("both", "group", "groups", "list all groups founded on the server"),
     MEMBERS_OF_GROUP("both", "group", "members", "list all members in groups ex: members nameOfGroup"),
-    SEND_FILE("client", "file", "send_to", "send file to someone connected to the server ex: send_to pc1 pathOfYourFile");
+    SEND_FILE("client", "file", "file_to", "send file ex: file_to pc1 pathOfYourFile or send_to grp1 pathOfYourFile");
 
     private String side;
     private String functionality;

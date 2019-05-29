@@ -7,8 +7,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import validation.Validation;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -81,8 +83,8 @@ public class Keyboard extends Thread {
                                             logger.info("connected on " + ip + ":" + port);
                                         } else
                                             errorMessage();
-                                    } catch (IOException e) {
-                                        logger.error("IO exception in keyboard thread\t----->\t" + e.getMessage());
+                                    } catch (IOException ignored) {
+
                                     }
                                 } else
                                     System.out.println("you are already connected...");
@@ -198,9 +200,37 @@ public class Keyboard extends Thread {
                             break;
                         case SEND_FILE:
                             if (user.isConnected()) {
-                                if (command.length == 2)
-                                    user.produce(Command.SEND_FILE.getCommand());
-                                else
+                                if (command.length == 3) {
+                                    //parse id of pc
+                                    Matcher matcherUser = Validation.CLIENT.getPattern().matcher(command[1]);
+                                    //parse id of group
+                                    Matcher matcherGroup = Validation.GROUP.getPattern().matcher(command[1]);
+
+                                    File file = new File(command[2]);
+                                    String extension = file.getName().substring(file.getName().lastIndexOf("."));
+                                    if (!file.exists())
+                                        System.out.println("sorry file not exist!");
+
+                                    else if (matcherUser.matches()) {
+
+                                        String[] pcs = command[1].split("pc");
+                                        int partnerId = Integer.parseInt(pcs[1]);
+                                        if (partnerId != user.getId()) {
+                                            //send file
+                                            user.produce(Command.SEND_FILE.getCommand() + " pc" + partnerId + " 0xff" + Arrays.toString(Files.readAllBytes(file.toPath())) + "0xff" + extension);
+                                        } else
+                                            System.out.println("you send to yourself the file");
+
+
+                                    } else if (matcherGroup.matches()) {
+                                        String[] groups = command[1].split("grp");
+                                        int groupId = Integer.parseInt(groups[1]);
+                                        //send file
+                                        user.produce(Command.SEND_FILE.getCommand() + " grp" + groupId + " 0xff" + Arrays.toString(Files.readAllBytes(file.toPath())) + "0xff" + extension);
+                                    }
+
+
+                                } else
                                     errorMessage();
                             } else
                                 System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
@@ -219,6 +249,9 @@ public class Keyboard extends Thread {
                 } catch (InterruptedException e) {
                     logger.error("Interrupted exception in keyboard thread\t----->\t" + e.getMessage());
                     startPrefix();
+                } catch (IOException e) {
+                    int ix = 0;
+                    ix++;
                 }
             } else {
                 errorMessage();

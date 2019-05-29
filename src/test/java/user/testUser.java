@@ -13,4 +13,9 @@ public class testUser {
     public void setSocket() throws IOException {
         Socket socket = new Socket(InetAddress.getByName("127.0.0.1"), 123);
     }
+
+    @Test
+    public void t(){
+
+    }
 }
