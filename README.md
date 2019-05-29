@@ -34,4 +34,5 @@ connected and known.<br />
  3.1.2-list_grp:list all groups founded on the server<br />&nbsp;&nbsp;
  3.1.3-members:list all members in groups ex: members nameOfGroup<br />&nbsp;&nbsp;
 
-I use Log4j for logging and Junit 5 for testing.
+I use Log4j for logging and Junit 5 for testing.<br />
+all messages it's encrypted using asymetrique(RSA) and symetrique (AES) encryption.<br />
