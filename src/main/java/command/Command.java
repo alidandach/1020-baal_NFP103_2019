@@ -8,6 +8,7 @@ public enum Command {
     HELP("both", "core", "help", "Print a help message"),
     KILL("server", "core", "kill", "kill user ex: kill pc1"),
     QUIT("both", "core", "quit", "Exit application"),
+    MY_ID("client", "core", "id", "get your id from the server"),
     START("server", "core", "start", "Configure a machine to listen on a specific port ex: start 5555"),
     CHAT_WITH_USER("client", "chat", "usr", "chat with another user ex: usr pc1 message"),
     CHAT_ON_GROUP("client", "group", "group", "chat with members group ex: group grp1 message"),

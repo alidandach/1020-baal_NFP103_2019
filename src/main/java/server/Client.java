@@ -78,6 +78,10 @@ public class Client implements Comparable<Client> {
                     // receive the command from user
                     request = input.readLine();
 
+                    //security check
+                    if (request == null)
+                        return;
+
                     //request contains command and parameters
                     String[] command = request.trim().split(" ");
 
@@ -195,7 +199,8 @@ public class Client implements Comparable<Client> {
                                             if (c != null) {
                                                 c.send(Command.SEND_FILE.getCommand() + " 0xff" + this.getHostName() + "0xff" + this.id + "0xff" + file[1] + "0xff" + file[2]);
                                                 bridge.put("server say:file sent successfully");
-                                            }
+                                            } else
+                                                bridge.put("server say:client not found");
 
                                         }
                                     } else if (matcherGroup.matches()) {
@@ -203,7 +208,7 @@ public class Client implements Comparable<Client> {
                                         int groupId = Integer.parseInt(groups[1]);
                                         if (server.groupIsExist(groupId)) {
                                             Group group = server.getGroupById(groupId);
-                                            group.sendFile(this, Command.SEND_FILE.getCommand() + " 0xff" + group.getName()+ "_group"+ "_by_" + this.getHostName() + "0xff" + this.id + "0xff" + file[1] + "0xff" + file[2]);
+                                            group.sendFile(this, Command.SEND_FILE.getCommand() + " 0xff" + group.getName() + "_group" + "_by_" + this.getHostName() + "0xff" + this.id + "0xff" + file[1] + "0xff" + file[2]);
                                             bridge.put("server say:file sent successfully");
                                         } else
                                             this.send("server say:sorry this group not exist");

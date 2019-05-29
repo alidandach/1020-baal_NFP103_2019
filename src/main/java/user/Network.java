@@ -8,6 +8,7 @@ import validation.Validation;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.file.Paths;
 import java.util.regex.Matcher;
 
 class Network {
@@ -108,17 +109,19 @@ class Network {
                         String[] ids = response.toString().trim().split("0xee");
                         user.setId(Integer.parseInt(ids[1]));
                     } else if (file.length == 5) {
+
                         File receivedFile = new File("from_" + file[1] + "_id_" + file[2] + "_" + System.currentTimeMillis() + file[4]);
 
-                        boolean isCreated = receivedFile.createNewFile();
-
-                        if (isCreated) {
+                        if (receivedFile.createNewFile()) {
                             FileOutputStream fos = new FileOutputStream(receivedFile);
                             fos.write(convertToByte(file[3]));
                             fos.flush();
                             fos.close();
+
                             System.out.println("new file received from " + file[1]);
+                            System.out.println("saved to:" + receivedFile.getAbsolutePath());
                         }
+
 
                         //adjusting console
                         startPrefix();

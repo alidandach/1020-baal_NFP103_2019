@@ -84,7 +84,7 @@ public class Keyboard extends Thread {
                                         } else
                                             errorMessage();
                                     } catch (IOException ignored) {
-
+                                        System.out.println("Unable to connect to the server maybe it disabled");
                                     }
                                 } else
                                     System.out.println("you are already connected...");
@@ -106,8 +106,14 @@ public class Keyboard extends Thread {
                                     //parse id of pc
                                     Matcher matcher = Validation.CLIENT.getPattern().matcher(command[1]);
                                     if (matcher.matches()) {
-                                        String s = Arrays.toString(command);
-                                        user.produce(s.substring(1, s.length() - 1).replace(",", ""));
+                                        String[] pcs = command[1].split("pc");
+                                        int partnerId = Integer.parseInt(pcs[1]);
+                                        if (partnerId != user.getId()) {
+                                            String s = Arrays.toString(command);
+                                            user.produce(s.substring(1, s.length() - 1).replace(",", ""));
+                                        } else {
+                                            System.out.println("you talk to yourself");
+                                        }
                                     } else
                                         errorMessage();
                                 } else
@@ -219,7 +225,7 @@ public class Keyboard extends Thread {
                                             //send file
                                             user.produce(Command.SEND_FILE.getCommand() + " pc" + partnerId + " 0xff" + Arrays.toString(Files.readAllBytes(file.toPath())) + "0xff" + extension);
                                         } else
-                                            System.out.println("you send to yourself the file");
+                                            System.out.println("impossible to send to yourself the file");
 
 
                                     } else if (matcherGroup.matches()) {
@@ -241,6 +247,13 @@ public class Keyboard extends Thread {
                             break;
                         case HELP:
                             helpMessage();
+                            break;
+                        case MY_ID:
+                            if (user.isConnected())
+                                System.out.println("your id:" + user.getId());
+                            else
+                                System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
+                            startPrefix();
                             break;
                         default:
                             errorMessage();
