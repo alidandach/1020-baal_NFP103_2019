@@ -3,7 +3,7 @@ ACCOV project
 This project i did after i finished the ACCOV Cours at CNAM (Conservatoire national des arts et métiers)
 this project is similar to IRC (Internet Relay Chat).It is desired to create a client / server system that makes it possible to communicate with several simultaneously on
 the network.
-
+/n/r
 Client side:
 ------------
 1-the client sends messages (text) to the server.
