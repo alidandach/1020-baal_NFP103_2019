@@ -1,8 +1,15 @@
 package user;
 
 import command.Command;
+import security.Symmetric;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.net.*;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -11,8 +18,10 @@ public class User {
     private Socket socket;
     private Keyboard keyboard;
     private Network network;
-    private BlockingQueue<String> bridge;
+    private Symmetric symmetric;
+    private PublicKey publicKey;
     private volatile boolean running;
+    private BlockingQueue<String> bridge;
 
     public User() {
         bridge = new ArrayBlockingQueue<>(1);
@@ -37,6 +46,53 @@ public class User {
      */
     void setId(int id){
         this.id=id;
+    }
+
+    /**
+     * getter for secret key between user and server
+     *
+     * @return bytes secret key
+     */
+    byte[] getSecretKey(){
+        return symmetric.getSecretKey();
+    }
+
+    /**
+     * generate secret key
+     *
+     * @throws NoSuchAlgorithmException occur
+     */
+    void setSecretKey() throws NoSuchAlgorithmException {
+        symmetric=new Symmetric();
+        symmetric.setKey();
+    }
+
+    /**
+     * getter for the public key
+     *
+     * @return String public key
+     */
+    PublicKey getPublicKey(){
+        return publicKey;
+    }
+
+    /**
+     * set public key of the server
+     *
+     * @param keyBytes key in form of byte
+     */
+    void setPublicKey(byte[] keyBytes) throws InvalidKeySpecException, NoSuchAlgorithmException {
+        X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        publicKey=kf.generatePublic(spec);
+    }
+
+    byte[] encrypt(byte[] data) throws IllegalBlockSizeException, InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, InvalidAlgorithmParameterException {
+        return symmetric.encrypt(data);
+    }
+
+    byte[] decrypt(byte[] data) throws IllegalBlockSizeException, InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, InvalidAlgorithmParameterException {
+       return symmetric.decrypt(data);
     }
 
     /**

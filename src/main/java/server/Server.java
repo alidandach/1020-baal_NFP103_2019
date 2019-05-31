@@ -1,32 +1,38 @@
 package server;
 
+import security.Asymmetric;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.Vector;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.stream.Stream;
 
 
 public class Server {
     private int port;
     private volatile boolean running;
+    private Asymmetric asymmetric;
     private KeyBoardInput keyBoardInput;
     private NetworkInput networkInput;
     private ServerSocket serverSocket;
     private Vector<Client> clients;
     private Vector<Group> groups;
-    private BlockingQueue<String> queue;
 
 
     public Server() {
         running = true;
         clients = new Vector<>();
         groups = new Vector<>();
-        queue = new ArrayBlockingQueue<>(1);
         keyBoardInput = new KeyBoardInput("server keyboard", this);
         keyBoardInput.start();
     }
@@ -34,36 +40,52 @@ public class Server {
     /**
      * method used to set port to start listing
      *
-     * @param p int port number
-     * @return String message
+     * @param port int port number
+     *
+     * @return boolean true if success
      */
-    String setPort(String p) {
-        if (p == null)
-            return "null";
-        else if (serverSocket != null)
-            return "null";
-        try {
-            int port = Integer.parseInt(p);
-            if (port < 1024 || port > 65536)
-                return "null";
-            this.port = port;
-            try {
-                serverSocket = new ServerSocket(port);
-                networkInput = new NetworkInput("networkInput server", this);
-                networkInput.start();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return e.getMessage();
-            }
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
-            return e.getMessage();
-        }
-        return "server started...";
+    boolean setPort(String port) throws IOException, NumberFormatException {
+        if (serverSocket != null)
+            return false;
+
+        this.port = Integer.parseInt(port);
+        serverSocket = new ServerSocket(this.port);
+        networkInput = new NetworkInput("networkInput server", this);
+        networkInput.start();
+
+        return true;
     }
 
-    BlockingQueue<String> getQueue() {
-        return queue;
+
+    /**
+     * method used to generate public key and private key
+     *
+     * @throws NoSuchAlgorithmException occur
+     */
+    void generatePair() throws NoSuchAlgorithmException {
+        asymmetric = new Asymmetric(1024);
+    }
+
+    /**
+     * getter public key
+     *
+     * @return string public key
+     */
+    PublicKey getPublicKey() {
+        return asymmetric.getPublicKey();
+    }
+
+    byte[] decrypt(byte[] data) throws IllegalBlockSizeException, InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException {
+        return asymmetric.decrypt(data);
+    }
+
+    /**
+     * getter private key
+     *
+     * @return private key
+     */
+    PrivateKey getPrivateKey() {
+        return asymmetric.getPrivateKey();
     }
 
     /**
@@ -80,28 +102,27 @@ public class Server {
      *
      * @return boolean if true network is started
      */
-    synchronized boolean isStarted() {
-        return networkInput != null;
+    synchronized boolean isNetworkDown() {
+        return networkInput == null;
     }
+
 
     /**
      * this method used to shutdown network thread if it's running and the keyboard thread.
      * after shutdown the network and keyboard threads the main thread turn off automatically
+     *
+     * @throws IOException occur
      */
-    synchronized void shutdown() {
-        try {
-            running = false;
+    synchronized void shutdown() throws IOException {
+        running = false;
 
-            if (networkInput != null) {
-                disconnectAllClients();
-                PrintWriter output = new PrintWriter(new Socket(InetAddress.getLocalHost(), port).getOutputStream(), true);
-                output.println("");
-                output.close();
-            }
-
-        } catch (IOException e) {
-            System.out.println("problem when shutdown the server:" + e.getMessage());
+        if (networkInput != null) {
+            disconnectAllClients();
+            PrintWriter output = new PrintWriter(new Socket(InetAddress.getLocalHost(), port).getOutputStream(), true);
+            output.println("");
+            output.close();
         }
+
 
     }
 
@@ -308,7 +329,6 @@ public class Server {
      * check if group exist in the server
      *
      * @param groupId int group id
-     *
      * @return true if exist
      */
     boolean groupIsExist(int groupId) {

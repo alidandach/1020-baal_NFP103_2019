@@ -3,14 +3,23 @@ package user;
 
 import command.Command;
 import context.Banner;
+import flags.Echo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import security.Asymmetric;
 import validation.Validation;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
@@ -62,38 +71,67 @@ public class Keyboard extends Thread {
                             if (command.length == 7) {
                                 //check if user already connected to server
                                 if (!user.isConnected()) {
-                                    try {
-                                        StringBuilder request = new StringBuilder();
-                                        for (int i = 1; i < command.length; i++)
-                                            request.append(command[i]).append(" ");
 
-                                        Matcher matcher = Validation.CONNECT.getPattern().matcher(request.toString().trim());
-                                        if (matcher.matches()) {
-                                            String username = command[2];
-                                            String password = command[4];
+                                    StringBuilder request = new StringBuilder();
+                                    for (int i = 1; i < command.length; i++)
+                                        request.append(command[i]).append(" ");
 
-                                            String[] host = command[6].split(":");
-                                            String ip = host[0];
-                                            String port = host[1];
+                                    Matcher matcher = Validation.CONNECT.getPattern().matcher(request.toString().trim());
+                                    if (matcher.matches()) {
+                                        String username = command[2];
+                                        String password = command[4];
 
-                                            user.clearBridge();
-                                            //user.produce(Command.CONNECT.getCommand() + " " + username + " " + password);
+                                        String[] host = command[6].split(":");
+                                        String ip = host[0];
+                                        String port = host[1];
 
-                                            Socket s = new Socket(ip, Integer.parseInt(port));
-                                            PrintWriter out=new PrintWriter(s.getOutputStream(),true);
-                                            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-                                            out.println(Command.CONNECT.getCommand() + " " + username + " " + password);
-                                            String response = in.readLine();
-                                            if (response.trim().equals("0x6e65676174697665"))
-                                                System.out.println("invalid username or password");
-                                            else
+                                        user.clearBridge();
+
+                                        Socket s = new Socket(ip, Integer.parseInt(port));
+                                        PrintWriter out = new PrintWriter(s.getOutputStream(), true);
+                                        BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+                                        out.println(Command.CONNECT.getCommand() + " " + username + " " + password);
+                                        String response = in.readLine();
+
+
+                                        //authentication check
+                                        if (response.trim().equals(Echo.NEGATIVE_ACK.getValue()))
+                                            System.out.println("invalid username or password");
+
+                                        else {
+
+                                            //get public key from server {echo client}
+                                            out.println(Echo.ECHO_CLIENT.getValue());
+
+                                            //read public key
+                                            response=in.readLine();
+
+                                            //set public key
+                                            user.setPublicKey(Base64.getDecoder().decode(response.trim().getBytes()));
+
+                                            //generate AES key
+                                            user.setSecretKey();
+                                            logger.info("secret key generate: " + Base64.getEncoder().encodeToString(user.getSecretKey()));
+
+                                            //send AES key to server
+                                            out.println(Base64.getEncoder().encodeToString(Asymmetric.encrypt(user.getPublicKey(), user.getSecretKey())));
+
+                                            //wait accept connection from server
+                                            response = in.readLine();
+
+                                            String sssssssss="hhhh";
+
+                                            String data=new String(user.decrypt(Base64.getDecoder().decode(response.trim().getBytes())));
+
+                                            if (data.equals(Echo.POSITIVE_ACK.getValue()))
                                                 user.setSocket(s);
+                                            else
+                                                System.out.println("server not accept your key please try again...");
+                                        }
 
-                                        } else
-                                            errorMessage();
-                                    } catch (IOException ignored) {
-                                        System.out.println("Unable to connect to the server maybe it disabled");
-                                    }
+                                    } else
+                                        errorMessage();
+
                                 } else
                                     System.out.println("you are already connected...");
                             } else
@@ -231,7 +269,7 @@ public class Keyboard extends Thread {
                                         int partnerId = Integer.parseInt(pcs[1]);
                                         if (partnerId != user.getId()) {
                                             //send file
-                                            user.produce(Command.SEND_FILE.getCommand() + " pc" + partnerId + " 0xff" + Arrays.toString(Files.readAllBytes(file.toPath())) + "0xff" + extension);
+                                            user.produce(Command.SEND_FILE.getCommand() + " pc" + partnerId + " " + flags.File.DATA_SEPARATOR.getValue() + Arrays.toString(Files.readAllBytes(file.toPath())) + flags.File.DATA_SEPARATOR.getValue() + extension);
                                         } else
                                             System.out.println("impossible to send to yourself the file");
 
@@ -240,7 +278,7 @@ public class Keyboard extends Thread {
                                         String[] groups = command[1].split("grp");
                                         int groupId = Integer.parseInt(groups[1]);
                                         //send file
-                                        user.produce(Command.SEND_FILE.getCommand() + " grp" + groupId + " 0xff" + Arrays.toString(Files.readAllBytes(file.toPath())) + "0xff" + extension);
+                                        user.produce(Command.SEND_FILE.getCommand() + " grp" + groupId + " " + flags.File.DATA_SEPARATOR.getValue() + Arrays.toString(Files.readAllBytes(file.toPath())) + flags.File.DATA_SEPARATOR.getValue() + extension);
                                     }
 
 
@@ -270,9 +308,17 @@ public class Keyboard extends Thread {
                 } catch (InterruptedException e) {
                     logger.error("Interrupted exception in keyboard thread\t----->\t" + e.getMessage());
                     startPrefix();
-                } catch (IOException e) {
-                    int ix = 0;
-                    ix++;
+                } catch (IOException ignored) {
+                    System.out.println("Unable to connect to the server maybe it disabled");
+                    startPrefix();
+                } catch (InvalidKeySpecException e) {
+                    logger.error("Invalid key Spec exception in keyboard thread\t----->\t" + e.getMessage());
+                    startPrefix();
+                } catch (NoSuchAlgorithmException e) {
+                    logger.error("No Such Algorithm exception in keyboard thread\t----->\t" + e.getMessage());
+                    startPrefix();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             } else {
                 errorMessage();

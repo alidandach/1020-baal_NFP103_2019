@@ -1,23 +1,31 @@
 package server;
 
 import command.Command;
+import flags.Identity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import security.Symmetric;
 import validation.Validation;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 
 public class Client implements Comparable<Client> {
     private static int counter = 1;
     private int id;
+    private byte []secretKey;
     private Server server;
     private Socket socket;
     private volatile boolean connected;
@@ -26,8 +34,9 @@ public class Client implements Comparable<Client> {
 
     private final static Logger logger = LogManager.getLogger(Client.class);
 
-    Client(Server s, Socket socket) {
+    Client(Server s, Socket socket, byte[] key) {
         id = counter++;
+        secretKey = key;
         server = s;
         this.socket = socket;
         connected = true;
@@ -41,26 +50,30 @@ public class Client implements Comparable<Client> {
             PrintWriter output;
             try {
                 output = new PrintWriter(socket.getOutputStream(), true);
-                String data;
+                String request;
                 while (connected) {
                     //wait to consume message
-                    data = bridge.take();
+                    request = bridge.take();
 
                     //send to user
-                    output.println(data);
+                    String d=Base64.getEncoder().encodeToString(Symmetric.encrypt(request.getBytes(),Base64.getEncoder().encodeToString(this.secretKey),new byte[16]));
+                    output.println(d);
 
                     //check if need to turn off this thread
-                    if (data.equals(Command.QUIT.getCommand()))
+                    if (request.equals(Command.QUIT.getCommand()))
                         break;
                 }
             } catch (IOException e) {
                 Interrupt();
                 newLine();
-                logger.error("IO exception\t----->\t" + e.getMessage());
+                logger.error("io exception\t----->\t" + e.getMessage());
             } catch (InterruptedException e) {
                 Interrupt();
                 newLine();
                 logger.error("Thread Exception\t----->\t" + e.getMessage());
+            } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException ignored) {
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
         transmitter.start();
@@ -73,17 +86,20 @@ public class Client implements Comparable<Client> {
             BufferedReader input = null;
             try {
                 input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                String request;
+                String response;
                 while (connected) {
                     // receive the command from user
-                    request = input.readLine();
+                    response = input.readLine();
 
                     //security check
-                    if (request == null)
+                    if (response == null)
                         return;
 
+                    String dataDecrypted = new String(Symmetric.decrypt(Base64.getDecoder().decode(response),Base64.getEncoder().encodeToString(this.secretKey),new byte[16]));
+
+
                     //request contains command and parameters
-                    String[] command = request.trim().split(" ");
+                    String[] command = dataDecrypted.trim().split(" ");
 
                     //parse command
                     Command cmd = Command.getCommand(command[0]);
@@ -189,7 +205,7 @@ public class Client implements Comparable<Client> {
                                     Matcher matcherGroup = Validation.GROUP.getPattern().matcher(command[1]);
 
                                     //parse file data
-                                    String[] file = request.trim().split("0xff");
+                                    String[] file = dataDecrypted.trim().split(flags.File.DATA_SEPARATOR.getValue());
 
                                     if (matcherUser.matches()) {
                                         String[] pcs = command[1].split("pc");
@@ -197,7 +213,7 @@ public class Client implements Comparable<Client> {
                                         if (partnerId != id) {
                                             Client c = server.getClientById(partnerId);
                                             if (c != null) {
-                                                c.send(Command.SEND_FILE.getCommand() + " 0xff" + this.getHostName() + "0xff" + this.id + "0xff" + file[1] + "0xff" + file[2]);
+                                                c.send(Command.SEND_FILE.getCommand() + " " + flags.File.DATA_SEPARATOR.getValue() + this.getHostName() + flags.File.DATA_SEPARATOR.getValue() + this.id + flags.File.DATA_SEPARATOR.getValue() + file[1] + flags.File.DATA_SEPARATOR.getValue() + file[2]);
                                                 bridge.put("server say:file sent successfully");
                                             } else
                                                 bridge.put("server say:client not found");
@@ -208,7 +224,7 @@ public class Client implements Comparable<Client> {
                                         int groupId = Integer.parseInt(groups[1]);
                                         if (server.groupIsExist(groupId)) {
                                             Group group = server.getGroupById(groupId);
-                                            group.sendFile(this, Command.SEND_FILE.getCommand() + " 0xff" + group.getName() + "_group" + "_by_" + this.getHostName() + "0xff" + this.id + "0xff" + file[1] + "0xff" + file[2]);
+                                            group.sendFile(this, Command.SEND_FILE.getCommand() + " " + flags.File.DATA_SEPARATOR.getValue() + group.getName() + "_group" + "_by_" + this.getHostName() + flags.File.DATA_SEPARATOR.getValue() + this.id + flags.File.DATA_SEPARATOR.getValue() + file[1] + flags.File.DATA_SEPARATOR.getValue() + file[2]);
                                             bridge.put("server say:file sent successfully");
                                         } else
                                             this.send("server say:sorry this group not exist");
@@ -234,6 +250,9 @@ public class Client implements Comparable<Client> {
                 Interrupt();
                 System.out.println("\nThere is a user left");
                 startPrefix();
+            } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException ignored) {
+            } catch (Exception e) {
+                e.printStackTrace();
             } finally {
                 try {
                     if (input != null)
@@ -254,6 +273,15 @@ public class Client implements Comparable<Client> {
      */
     int getId() {
         return id;
+    }
+
+    /**
+     * getter for secret key between client and server
+     *
+     * @return String secret key
+     */
+    String getSecretKey() {
+        return Base64.getEncoder().encodeToString(secretKey);
     }
 
     /**

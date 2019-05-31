@@ -19,8 +19,9 @@ public class Asymmetric {
      */
     public Asymmetric(int keyLength)throws NoSuchAlgorithmException {
         //generate pair
+        SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-        keyGen.initialize(keyLength);
+        keyGen.initialize(keyLength,random);
         KeyPair pair = keyGen.generateKeyPair();
         this.privateKey = pair.getPrivate();
         this.publicKey = pair.getPublic();
@@ -30,7 +31,7 @@ public class Asymmetric {
     /**
      * getter private key
      *
-     * @return private key
+     * @return Private key
      */
     public PrivateKey getPrivateKey() {
         return privateKey;
@@ -39,7 +40,7 @@ public class Asymmetric {
     /**
      * getter public key
      *
-     * @return
+     * @return Public Key
      */
     public PublicKey getPublicKey() {
         return publicKey;
@@ -47,7 +48,7 @@ public class Asymmetric {
 
     /**
      *
-     * @param message message to be encrypt
+     * @param data data to be encrypt
      *
      * @return encrypted data in form of byte
      *
@@ -57,16 +58,22 @@ public class Asymmetric {
      * @throws NoSuchPaddingException occur
      * @throws NoSuchAlgorithmException occur
      */
-    public byte[] encrypt(String message) throws BadPaddingException, IllegalBlockSizeException, InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException {
+    public byte[] encrypt(String data) throws BadPaddingException, IllegalBlockSizeException, InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException {
         Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-        return cipher.doFinal(message.getBytes());
+        return cipher.doFinal(data.getBytes());
+    }
+
+    public static byte[] encrypt(PublicKey publicKey,byte[] data) throws NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException {
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+        return cipher.doFinal(data);
     }
 
     /**
      * decryption data
      *
-     * @param message message to be encrypted
+     * @param data data to be encrypted
      *
      * @return encrypted data in form of byte
      *
@@ -76,9 +83,10 @@ public class Asymmetric {
      * @throws NoSuchPaddingException occur
      * @throws NoSuchAlgorithmException occur
      */
-    public byte[] decrypt(String message) throws BadPaddingException, IllegalBlockSizeException, InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException {
+    public byte[] decrypt(byte[] data) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         cipher.init(Cipher.DECRYPT_MODE, privateKey);
-        return cipher.doFinal(message.getBytes());
+        return cipher.doFinal(data);
     }
+
 }

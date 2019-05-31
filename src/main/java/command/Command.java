@@ -18,7 +18,8 @@ public enum Command {
     JOIN_GROUP("client", "group", "join", "join group ex: join nameOfGroup"),
     LIST_GROUPS("both", "group", "groups", "list all groups founded on the server"),
     MEMBERS_OF_GROUP("both", "group", "members", "list all members in groups ex: members nameOfGroup"),
-    SEND_FILE("client", "file", "file_to", "send file ex: file_to pc1 pathOfYourFile or send_to grp1 pathOfYourFile");
+    SEND_FILE("client", "file", "file_to", "send file ex: file_to pc1 pathOfYourFile or send_to grp1 pathOfYourFile"),
+    PAIR("server", "core", "pair", "get public and private key, you must start the server to get them");
 
     private String side;
     private String functionality;

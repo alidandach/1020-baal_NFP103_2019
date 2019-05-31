@@ -2,13 +2,20 @@ package user;
 
 
 import command.Command;
+import flags.Identity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import validation.Validation;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.*;
 import java.net.Socket;
-import java.nio.file.Paths;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.regex.Matcher;
 
 class Network {
@@ -41,7 +48,7 @@ class Network {
                     request = user.consume();
 
                     //produce to server
-                    output.println(request);
+                    output.println(Base64.getEncoder().encodeToString(user.encrypt(request.getBytes())));
 
                     //check if need to turn off this thread
                     if (request.equals(Command.QUIT.getCommand()))
@@ -50,9 +57,11 @@ class Network {
                 }
 
             } catch (IOException e) {
-                logger.error("IO exception in transmitter thread\t----->\t" + e.getMessage());
+                logger.error("io exception in transmitter thread\t----->\t" + e.getMessage());
             } catch (InterruptedException e) {
                 logger.error("Interrupted exception in transmitter thread\t----->\t" + e.getMessage());
+            } catch (NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException | InvalidAlgorithmParameterException e) {
+                e.printStackTrace();
             } finally {
                 if (first)
                     System.out.println();
@@ -93,20 +102,22 @@ class Network {
                         response.append((char) c);
                     } while (socket.getInputStream().available() > 0);
 
+                    String dataDecrypted = new String(user.decrypt(Base64.getDecoder().decode(response.toString().trim().getBytes())));
+
                     //Maybe server send id
-                    Matcher matcher = Validation.ID.getPattern().matcher(response.toString().trim());
+                    Matcher matcher = Validation.ID.getPattern().matcher(dataDecrypted.trim());
 
                     //Maybe server send file in form of byte
-                    String[] file = response.toString().trim().split("0xff");
+                    String[] file = dataDecrypted.trim().split(flags.File.DATA_SEPARATOR.getValue());
 
                     //Maybe disconnected from server
-                    if (response.toString().equals(Command.QUIT.getCommand() + "\r\n")) {
+                    if (dataDecrypted.equals(Command.QUIT.getCommand())) {
                         //disconnect transmitter thread
                         user.disconnect();
                         connected = false;
                         return;
                     } else if (matcher.matches()) {
-                        String[] ids = response.toString().trim().split("0xee");
+                        String[] ids = dataDecrypted.trim().split(Identity.ID.getValue());
                         user.setId(Integer.parseInt(ids[1]));
                     } else if (file.length == 5) {
 
@@ -126,7 +137,7 @@ class Network {
                         //adjusting console
                         startPrefix();
                     } else {
-                        System.out.print(response);
+                        System.out.print(dataDecrypted);
 
                         //adjusting console
                         startPrefix();
@@ -136,8 +147,8 @@ class Network {
                     //clear response
                     response.setLength(0);
                 }
-            } catch (IOException | InterruptedException ignored) {
-
+            } catch (IOException | InterruptedException | NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException | InvalidAlgorithmParameterException e) {
+                e.printStackTrace();
             } finally {
                 try {
                     if (first)
@@ -155,7 +166,7 @@ class Network {
 
                     first = !first;
                 } catch (IOException e) {
-                    logger.error("IO exception in receiver thread\t----->\t" + e.getMessage());
+                    logger.error("io exception in receiver thread\t----->\t" + e.getMessage());
                 } catch (InterruptedException e) {
                     logger.error("Interrupted exception in receiver thread\t----->\t" + e.getMessage());
                 }
