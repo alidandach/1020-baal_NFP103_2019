@@ -78,8 +78,12 @@ public class Group implements Comparable<Group> {
      * @param deletedClient Client to be deleted
      */
     void removeClient(Client deletedClient) {
-        if(!deletedClient.equals(administrator))
-            administrator.send(deletedClient.getHostName() + " left group.");
+        if (deletedClient.equals(administrator)) {
+            deletedClient.getServer().removeGroup(deletedClient,this.getName(),false);
+            return;
+        }
+
+        administrator.send(deletedClient.getHostName() + " left group.");
         members.remove(deletedClient);
         for (Client client : members) {
             if (!client.equals(deletedClient))
@@ -132,6 +136,8 @@ public class Group implements Comparable<Group> {
      * @param fromServer if true destroy of group is from server
      */
     void destroy(boolean fromServer) {
+        if(fromServer)
+            administrator.send(name + " group is deleted by the administrator of server.");
         for (Client member : members)
             if (!fromServer)
                 member.send(name + " group is deleted by the owner.");

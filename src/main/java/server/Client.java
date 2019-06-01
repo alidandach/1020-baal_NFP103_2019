@@ -25,7 +25,7 @@ import java.util.regex.Matcher;
 public class Client implements Comparable<Client> {
     private static int counter = 1;
     private int id;
-    private byte []secretKey;
+    private byte[] secretKey;
     private Server server;
     private Socket socket;
     private volatile boolean connected;
@@ -56,7 +56,7 @@ public class Client implements Comparable<Client> {
                     request = bridge.take();
 
                     //send to user
-                    String d=Base64.getEncoder().encodeToString(Symmetric.encrypt(request.getBytes(),Base64.getEncoder().encodeToString(this.secretKey),new byte[16]));
+                    String d = Base64.getEncoder().encodeToString(Symmetric.encrypt(request.getBytes(), Base64.getEncoder().encodeToString(this.secretKey), new byte[16]));
                     output.println(d);
 
                     //check if need to turn off this thread
@@ -95,7 +95,7 @@ public class Client implements Comparable<Client> {
                     if (response == null)
                         return;
 
-                    String dataDecrypted = new String(Symmetric.decrypt(Base64.getDecoder().decode(response),Base64.getEncoder().encodeToString(this.secretKey),new byte[16]));
+                    String dataDecrypted = new String(Symmetric.decrypt(Base64.getDecoder().decode(response), Base64.getEncoder().encodeToString(this.secretKey), new byte[16]));
 
 
                     //request contains command and parameters
@@ -145,9 +145,9 @@ public class Client implements Comparable<Client> {
 
                             case CREATE_GROUP:
                                 if (command.length == 2) {
-                                    if(server.containsGroup(command[1]))
+                                    if (server.containsGroup(command[1]))
                                         bridge.put("server say: existing group tried with another group name");
-                                    if (server.addGroup(new Group(command[1], this))) {
+                                    else if (server.addGroup(new Group(command[1], this))) {
                                         System.out.println("\nnew group added");
                                         bridge.put("server say:new group added");
                                     } else {
@@ -177,9 +177,11 @@ public class Client implements Comparable<Client> {
 
                             case DELETE_GROUP:
                                 if (command.length == 2)
-                                    if (server.removeGroup(this, command[1], false))
+                                    if (server.removeGroup(this, command[1], false)) {
                                         bridge.put("server say:delete group " + command[1]);
-                                    else
+                                        System.out.println("\ngroup" + command[1] + " deleted");
+                                        startPrefix();
+                                    } else
                                         bridge.put("server say:we could not delete group " + command[1]);
                                 break;
                             case CHAT_ON_GROUP:
@@ -280,12 +282,12 @@ public class Client implements Comparable<Client> {
     }
 
     /**
-     * getter for secret key between client and server
+     * getter for server
      *
-     * @return String secret key
+     * @return Server
      */
-    String getSecretKey() {
-        return Base64.getEncoder().encodeToString(secretKey);
+    Server getServer() {
+        return server;
     }
 
     /**
