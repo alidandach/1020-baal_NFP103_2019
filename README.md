@@ -36,3 +36,9 @@ connected and known.<br />
 
 I use Log4j for logging and Junit 5 for testing.<br />
 all messages it's encrypted using asymetrique(RSA) and symetrique (AES) encryption.<br />
+all encrypted messages it's encoded with Base 64<br />
+
+patterns used:
+--------------
+-1 producer consumer<br />
+
