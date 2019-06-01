@@ -3,8 +3,8 @@ ACCOV project<br />
 This project i did after i finished the ACCOV Cours at CNAM (Conservatoire national des arts et métiers).<br />
 this project is similar to IRC (Internet Relay Chat).It is desired to create a client / server system that makes it possible to communicate with several simultaneously on the network.<br />
 
-Client side:<br />
-------------<br />
+Client side
+------------
 1-the client sends messages (text) to the server.<br />
 2-the client accepts the following commands typed:<br />&nbsp;&nbsp;
 2.1.1-who:List all clients connected to server<br />&nbsp;&nbsp;
@@ -20,8 +20,8 @@ Client side:<br />
  2.3.6-members:list all members in groups ex: members nameOfGroup<br />&nbsp;&nbsp;
  2.4.1-send_to:send file to someone connected to the server ex: send_to pc1 pathOfYourFile<br /><br />
 
- Server side:<br />
- ------------<br />
+ Server side
+ ------------
 1-the server broadcasts all messages (text) it receives from one of these clients to all other clients
 connected and known.<br />
 2-the server accepts the following commands:<br />
@@ -34,5 +34,13 @@ connected and known.<br />
  3.1.2-list_grp:list all groups founded on the server<br />&nbsp;&nbsp;
  3.1.3-members:list all members in groups ex: members nameOfGroup<br />&nbsp;&nbsp;
 
+features
+--------
 I use Log4j for logging and Junit 5 for testing.<br />
 all messages it's encrypted using asymetrique(RSA) and symetrique (AES) encryption.<br />
+all encrypted messages it's encoded with Base 64<br />
+
+patterns used
+--------------
+-1 producer consumer<br />
+
