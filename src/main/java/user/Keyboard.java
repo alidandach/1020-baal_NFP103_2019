@@ -119,10 +119,10 @@ public class Keyboard extends Thread {
                                             //wait accept connection from server
                                             response = in.readLine();
 
-                                            String sssssssss = "hhhh";
-
+                                            //decrypt data
                                             String data = new String(user.decrypt(Base64.getDecoder().decode(response.trim().getBytes())));
 
+                                            //if data encrypted contains positive ack
                                             if (data.equals(Echo.POSITIVE_ACK.getValue()))
                                                 user.setSocket(s);
                                             else
@@ -194,8 +194,10 @@ public class Keyboard extends Thread {
                             if (user.isConnected()) {
                                 if (command.length == 2) {
                                     user.produce(Command.CREATE_GROUP.getCommand() + " " + command[1]);
-                                } else
+                                } else {
                                     errorMessage();
+                                    startPrefix();
+                                }
                             } else {
                                 System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
                                 startPrefix();
@@ -232,8 +234,10 @@ public class Keyboard extends Thread {
                             if (user.isConnected()) {
                                 if (command.length == 2) {
                                     user.produce(Command.DELETE_GROUP.getCommand() + " " + command[1]);
-                                } else
+                                } else {
                                     errorMessage();
+                                    startPrefix();
+                                }
                             } else {
                                 System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
                                 startPrefix();
@@ -242,6 +246,11 @@ public class Keyboard extends Thread {
                             break;
                         case LIST_GROUPS:
                             if (user.isConnected()) {
+                                if(command.length!=1){
+                                    System.out.println("invalid input....");
+                                    errorMessage();
+                                    startPrefix();
+                                }
                                 user.produce(Command.LIST_GROUPS.getCommand());
                             } else {
                                 System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
