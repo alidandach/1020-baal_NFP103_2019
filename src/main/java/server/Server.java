@@ -41,7 +41,6 @@ public class Server {
      * method used to set port to start listing
      *
      * @param port int port number
-     *
      * @return boolean true if success
      */
     boolean setPort(String port) throws IOException, NumberFormatException {
@@ -366,6 +365,20 @@ public class Server {
             group.removeClient(client);
             return true;
         }
+        return false;
+    }
+
+    /**
+     * method used to check if group exist before add new group
+     *
+     * @param name String name of group
+     *
+     * @return true if exist same name
+     */
+    boolean containsGroup(String name) {
+        for (Group group : groups)
+            if (group.getName().equals(name))
+                return true;
         return false;
     }
 

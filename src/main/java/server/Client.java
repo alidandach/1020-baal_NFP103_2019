@@ -145,6 +145,8 @@ public class Client implements Comparable<Client> {
 
                             case CREATE_GROUP:
                                 if (command.length == 2) {
+                                    if(server.containsGroup(command[1]))
+                                        bridge.put("server say: existing group tried with another group name");
                                     if (server.addGroup(new Group(command[1], this))) {
                                         System.out.println("\nnew group added");
                                         bridge.put("server say:new group added");
@@ -194,6 +196,8 @@ public class Client implements Comparable<Client> {
                                             message.append(command[i]).append(" ");
                                         if (group != null)
                                             group.broadcast(this, message.toString());
+                                        else
+                                            this.send("server say: group not exist!");
                                     }
                                 }
                                 break;

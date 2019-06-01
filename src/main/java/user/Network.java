@@ -137,7 +137,7 @@ class Network {
                         //adjusting console
                         startPrefix();
                     } else {
-                        System.out.print(dataDecrypted);
+                        System.out.println("\n"+dataDecrypted);
 
                         //adjusting console
                         startPrefix();

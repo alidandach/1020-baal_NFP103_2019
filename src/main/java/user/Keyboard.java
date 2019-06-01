@@ -104,7 +104,7 @@ public class Keyboard extends Thread {
                                             out.println(Echo.ECHO_CLIENT.getValue());
 
                                             //read public key
-                                            response=in.readLine();
+                                            response = in.readLine();
 
                                             //set public key
                                             user.setPublicKey(Base64.getDecoder().decode(response.trim().getBytes()));
@@ -119,9 +119,9 @@ public class Keyboard extends Thread {
                                             //wait accept connection from server
                                             response = in.readLine();
 
-                                            String sssssssss="hhhh";
+                                            String sssssssss = "hhhh";
 
-                                            String data=new String(user.decrypt(Base64.getDecoder().decode(response.trim().getBytes())));
+                                            String data = new String(user.decrypt(Base64.getDecoder().decode(response.trim().getBytes())));
 
                                             if (data.equals(Echo.POSITIVE_ACK.getValue()))
                                                 user.setSocket(s);
@@ -140,7 +140,11 @@ public class Keyboard extends Thread {
                             break;
                         case CLIENTS:
                             if (user.isConnected())
-                                user.produce(Command.CLIENTS.getCommand());
+                                if (command.length != 1) {
+                                    System.out.println("invalid input...");
+                                    errorMessage();
+                                } else
+                                    user.produce(Command.CLIENTS.getCommand());
                             else {
                                 System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
                                 startPrefix();
@@ -214,8 +218,10 @@ public class Keyboard extends Thread {
                             if (user.isConnected()) {
                                 if (command.length == 2) {
                                     user.produce(Command.EXIT_GROUP.getCommand() + " " + command[1]);
-                                } else
+                                } else {
                                     errorMessage();
+                                    startPrefix();
+                                }
                             } else {
                                 System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
                                 startPrefix();
@@ -244,7 +250,12 @@ public class Keyboard extends Thread {
                             break;
                         case MEMBERS_OF_GROUP:
                             if (user.isConnected())
-                                user.produce(command[0] + " " + command[1]);
+                                if (command.length == 2)
+                                    user.produce(command[0] + " " + command[1]);
+                                else {
+                                    errorMessage();
+                                    startPrefix();
+                                }
                             else {
                                 System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
                                 startPrefix();
@@ -296,7 +307,11 @@ public class Keyboard extends Thread {
                             break;
                         case MY_ID:
                             if (user.isConnected())
-                                System.out.println("your id:" + user.getId());
+                                if (command.length != 1) {
+                                    System.out.println("invalid input...");
+                                    errorMessage();
+                                } else
+                                    System.out.println("your id:" + user.getId());
                             else
                                 System.out.println("you are not connected to any server.please use " + Command.CONNECT.getCommand() + " command to connect to server.");
                             startPrefix();
