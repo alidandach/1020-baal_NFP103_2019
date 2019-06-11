@@ -3,19 +3,13 @@ package server;
 import command.Command;
 import flags.Echo;
 import flags.Identity;
-import security.Asymmetric;
 import security.Symmetric;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 public class NetworkInput extends Thread {

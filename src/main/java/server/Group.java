@@ -40,14 +40,6 @@ public class Group implements Comparable<Group> {
         return name;
     }
 
-    /**
-     * get administrator of group
-     *
-     * @return Client represent administrator of group
-     */
-    Client getAdministrator() {
-        return administrator;
-    }
 
     boolean isAdministrator(Client client) {
         return administrator.equals(client);
@@ -119,7 +111,8 @@ public class Group implements Comparable<Group> {
     /**
      * method used to sharing files on group
      *
-     * @param sender
+     * @param sender Client sender
+     * @param data String
      */
     void sendFile(Client sender, String data) {
         if (!isAdministrator(sender))
