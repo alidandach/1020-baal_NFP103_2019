@@ -12,9 +12,9 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 
 public class KeyBoardInput extends Thread {
+    private final static Logger logger = LogManager.getLogger(KeyBoardInput.class);
     private Server server;
     private Scanner input;
-    private final static Logger logger = LogManager.getLogger(KeyBoardInput.class);
 
 
     KeyBoardInput(String n, Server s) {

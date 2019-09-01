@@ -3,8 +3,8 @@ package flags;
 public enum Identity {
     ID(0Xee, "id of client");
 
+    private String description;
     private int value;
-    String description;
 
     Identity(int hex, String des) {
         value = hex;

@@ -56,10 +56,10 @@ public class Group implements Comparable<Group> {
             return false;
 
         members.add(newClient);
-        administrator.send(newClient.getHostName() + " enter " + name + " group.");
+        administrator.send(newClient.getHostName() +" [pc"+newClient.getId()+"]" + " enter " + name + " group.");
         for (Client client : members) {
             if (!client.equals(newClient))
-                client.send(newClient.getHostName() + " enter " + name + " group.");
+                client.send(newClient.getHostName() +" [pc"+newClient.getId()+"]" + " enter " + name + " group.");
         }
         return true;
     }
@@ -71,15 +71,15 @@ public class Group implements Comparable<Group> {
      */
     void removeClient(Client deletedClient) {
         if (deletedClient.equals(administrator)) {
-            deletedClient.getServer().removeGroup(deletedClient,this.getName(),false);
+            deletedClient.getServer().removeGroup(deletedClient, this.getName(), false);
             return;
         }
 
-        administrator.send(deletedClient.getHostName() + " left group.");
+        administrator.send(deletedClient.getHostName()+" [pc"+deletedClient.getId()+"] " + " left group.");
         members.remove(deletedClient);
         for (Client client : members) {
             if (!client.equals(deletedClient))
-                client.send(deletedClient.getHostName() + " left group.");
+                client.send(deletedClient.getHostName()+" [pc"+deletedClient.getId()+"] " + " left group.");
         }
     }
 
@@ -112,7 +112,7 @@ public class Group implements Comparable<Group> {
      * method used to sharing files on group
      *
      * @param sender Client sender
-     * @param data String
+     * @param data   String
      */
     void sendFile(Client sender, String data) {
         if (!isAdministrator(sender))
@@ -129,7 +129,7 @@ public class Group implements Comparable<Group> {
      * @param fromServer if true destroy of group is from server
      */
     void destroy(boolean fromServer) {
-        if(fromServer)
+        if (fromServer)
             administrator.send(name + " group is deleted by the administrator of server.");
         for (Client member : members)
             if (!fromServer)
@@ -162,6 +162,9 @@ public class Group implements Comparable<Group> {
 
         out.append("administrator is ");
         out.append(administrator.getHostName());
+        out.append(" [pc");
+        out.append(administrator.getId());
+        out.append("]");
         out.append("\n");
         out.append("\n");
 

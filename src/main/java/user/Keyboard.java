@@ -21,10 +21,10 @@ import java.util.regex.Matcher;
 
 
 public class Keyboard extends Thread {
+    private final static Logger logger = LogManager.getLogger(Keyboard.class);
     private User user;
     private Scanner input;
     private String prefix;
-    private final static Logger logger = LogManager.getLogger(Keyboard.class);
 
     Keyboard(String n, User c) {
         super(n);
@@ -242,7 +242,7 @@ public class Keyboard extends Thread {
                             break;
                         case LIST_GROUPS:
                             if (user.isConnected()) {
-                                if(command.length!=1){
+                                if (command.length != 1) {
                                     System.out.println("invalid input....");
                                     errorMessage();
                                     startPrefix();
@@ -273,30 +273,43 @@ public class Keyboard extends Thread {
                                     Matcher matcherUser = Validation.CLIENT.getPattern().matcher(command[1]);
                                     //parse id of group
                                     Matcher matcherGroup = Validation.GROUP.getPattern().matcher(command[1]);
+                                    //parse canonical path
+                                    Matcher matcherFile = Validation.FILE.getPattern().matcher(command[2]);
 
-                                    File file = new File(command[2]);
-                                    String extension = file.getName().substring(file.getName().lastIndexOf("."));
-                                    if (!file.exists())
-                                        System.out.println("sorry file not exist!");
+                                    if (!matcherUser.matches() && !matcherGroup.matches()) {
+                                        System.out.println("invalid input...");
+                                        startPrefix();
+                                    } else if (!matcherFile.matches()) {
+                                        System.out.println("invalid file path...");
+                                        startPrefix();
+                                    } else {
+                                        File file = new File(command[2]);
+                                        String extension = file.getName().substring(file.getName().lastIndexOf("."));
 
-                                    else if (matcherUser.matches()) {
+                                        if (!file.exists())
+                                            System.out.println("sorry file not exist ...");
 
-                                        String[] pcs = command[1].split("pc");
-                                        int partnerId = Integer.parseInt(pcs[1]);
-                                        if (partnerId != user.getId()) {
+                                        else if (file.length() == 0)
+                                            System.out.println("sorry file is empty ...");
+
+                                        else if (matcherUser.matches()) {
+
+                                            String[] pcs = command[1].split("pc");
+                                            int partnerId = Integer.parseInt(pcs[1]);
+                                            if (partnerId != user.getId()) {
+                                                //send file
+                                                user.produce(Command.SEND_FILE.getCommand() + " pc" + partnerId + " " + flags.File.DATA_SEPARATOR.getValue() + Arrays.toString(Files.readAllBytes(file.toPath())) + flags.File.DATA_SEPARATOR.getValue() + extension);
+                                            } else
+                                                System.out.println("impossible to send to yourself the file");
+
+
+                                        } else if (matcherGroup.matches()) {
+                                            String[] groups = command[1].split("grp");
+                                            int groupId = Integer.parseInt(groups[1]);
                                             //send file
-                                            user.produce(Command.SEND_FILE.getCommand() + " pc" + partnerId + " " + flags.File.DATA_SEPARATOR.getValue() + Arrays.toString(Files.readAllBytes(file.toPath())) + flags.File.DATA_SEPARATOR.getValue() + extension);
-                                        } else
-                                            System.out.println("impossible to send to yourself the file");
-
-
-                                    } else if (matcherGroup.matches()) {
-                                        String[] groups = command[1].split("grp");
-                                        int groupId = Integer.parseInt(groups[1]);
-                                        //send file
-                                        user.produce(Command.SEND_FILE.getCommand() + " grp" + groupId + " " + flags.File.DATA_SEPARATOR.getValue() + Arrays.toString(Files.readAllBytes(file.toPath())) + flags.File.DATA_SEPARATOR.getValue() + extension);
+                                            user.produce(Command.SEND_FILE.getCommand() + " grp" + groupId + " " + flags.File.DATA_SEPARATOR.getValue() + Arrays.toString(Files.readAllBytes(file.toPath())) + flags.File.DATA_SEPARATOR.getValue() + extension);
+                                        }
                                     }
-
 
                                 } else
                                     errorMessage();

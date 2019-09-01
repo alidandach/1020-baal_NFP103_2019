@@ -13,6 +13,51 @@ public class Symmetric {
 
     private SecretKey secretKey;
 
+    public static byte[] encrypt(byte[] plaintext, String encodedKey, byte[] IV) throws Exception {
+        //Get Cipher Instance
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+
+        // decode the base64 encoded string
+        byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
+
+        // rebuild key using SecretKeySpec
+        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+
+        //Create IvParameterSpec
+        IvParameterSpec ivSpec = new IvParameterSpec(IV);
+
+        //Initialize Cipher for ENCRYPT_MODE
+        cipher.init(Cipher.ENCRYPT_MODE, originalKey, ivSpec);
+
+        //Perform Encryption
+        return cipher.doFinal(plaintext);
+
+    }
+
+    public static byte[] decrypt(byte[] cipherText, String encodedKey, byte[] IV) throws Exception {
+        //Get Cipher Instance
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+
+        // decode the base64 encoded string
+        byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
+
+        // rebuild key using SecretKeySpec
+        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+
+
+        //Create SecretKeySpec
+        SecretKeySpec keySpec = new SecretKeySpec(originalKey.getEncoded(), "AES");
+
+        //Create IvParameterSpec
+        IvParameterSpec ivSpec = new IvParameterSpec(IV);
+
+        //Initialize Cipher for DECRYPT_MODE
+        cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
+
+        //Perform Decryption
+        return cipher.doFinal(cipherText);
+    }
+
     /**
      * getter secret key
      *
@@ -21,7 +66,6 @@ public class Symmetric {
     public byte[] getSecretKey() {
         return secretKey.getEncoded();
     }
-
 
     /**
      * setter for secret key
@@ -67,27 +111,6 @@ public class Symmetric {
         return cipher.doFinal(plaintext);
     }
 
-    public static byte[] encrypt(byte[] plaintext, String encodedKey, byte[] IV) throws Exception {
-        //Get Cipher Instance
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-
-        // decode the base64 encoded string
-        byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
-
-        // rebuild key using SecretKeySpec
-        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-
-        //Create IvParameterSpec
-        IvParameterSpec ivSpec = new IvParameterSpec(IV);
-
-        //Initialize Cipher for ENCRYPT_MODE
-        cipher.init(Cipher.ENCRYPT_MODE, originalKey, ivSpec);
-
-        //Perform Encryption
-        return cipher.doFinal(plaintext);
-
-    }
-
     /**
      * method used to decrypt data using eas algorithm
      *
@@ -112,30 +135,6 @@ public class Symmetric {
         //Initialize Cipher for DECRYPT_MODE
         cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
 
-
-        //Perform Decryption
-        return cipher.doFinal(cipherText);
-    }
-
-    public static byte[] decrypt(byte[] cipherText, String encodedKey, byte[] IV) throws Exception {
-        //Get Cipher Instance
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-
-        // decode the base64 encoded string
-        byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
-
-        // rebuild key using SecretKeySpec
-        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-
-
-        //Create SecretKeySpec
-        SecretKeySpec keySpec = new SecretKeySpec(originalKey.getEncoded(), "AES");
-
-        //Create IvParameterSpec
-        IvParameterSpec ivSpec = new IvParameterSpec(IV);
-
-        //Initialize Cipher for DECRYPT_MODE
-        cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
 
         //Perform Decryption
         return cipher.doFinal(cipherText);

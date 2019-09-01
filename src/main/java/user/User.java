@@ -6,7 +6,7 @@ import security.Symmetric;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.net.*;
+import java.net.Socket;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
@@ -35,7 +35,7 @@ public class User {
      *
      * @return int id of user
      */
-    int getId(){
+    int getId() {
         return id;
     }
 
@@ -44,8 +44,8 @@ public class User {
      *
      * @param id int
      */
-    void setId(int id){
-        this.id=id;
+    void setId(int id) {
+        this.id = id;
     }
 
     /**
@@ -53,7 +53,7 @@ public class User {
      *
      * @return bytes secret key
      */
-    byte[] getSecretKey(){
+    byte[] getSecretKey() {
         return symmetric.getSecretKey();
     }
 
@@ -63,7 +63,7 @@ public class User {
      * @throws NoSuchAlgorithmException occur
      */
     void setSecretKey() throws NoSuchAlgorithmException {
-        symmetric=new Symmetric();
+        symmetric = new Symmetric();
         symmetric.setKey();
     }
 
@@ -72,7 +72,7 @@ public class User {
      *
      * @return String public key
      */
-    PublicKey getPublicKey(){
+    PublicKey getPublicKey() {
         return publicKey;
     }
 
@@ -84,7 +84,7 @@ public class User {
     void setPublicKey(byte[] keyBytes) throws InvalidKeySpecException, NoSuchAlgorithmException {
         X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
         KeyFactory kf = KeyFactory.getInstance("RSA");
-        publicKey=kf.generatePublic(spec);
+        publicKey = kf.generatePublic(spec);
     }
 
     byte[] encrypt(byte[] data) throws IllegalBlockSizeException, InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, InvalidAlgorithmParameterException {
@@ -92,7 +92,7 @@ public class User {
     }
 
     byte[] decrypt(byte[] data) throws IllegalBlockSizeException, InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, BadPaddingException, InvalidAlgorithmParameterException {
-       return symmetric.decrypt(data);
+        return symmetric.decrypt(data);
     }
 
     /**
@@ -154,7 +154,6 @@ public class User {
 
     /**
      * this method used clear the all messages between network and keyboard
-     *
      */
     synchronized void clearBridge() {
         bridge.clear();
@@ -164,7 +163,6 @@ public class User {
      * this method used to produce message from keyboard
      *
      * @param message String to be produce
-     *
      * @throws InterruptedException in case of thread is waiting, sleeping, or otherwise occupied, and the thread is interrupted, either before or during the activity.
      */
     synchronized void produce(String message) throws InterruptedException {
@@ -175,10 +173,9 @@ public class User {
      * this method used to consume message using network
      *
      * @return String to be consume
-     *
      * @throws InterruptedException in case of thread is waiting, sleeping, or otherwise occupied, and the thread is interrupted, either before or during the activity.
      */
-     String consume() throws InterruptedException {
+    String consume() throws InterruptedException {
         return bridge.take();
     }
 

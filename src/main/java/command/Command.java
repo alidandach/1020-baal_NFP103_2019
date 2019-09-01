@@ -33,18 +33,6 @@ public enum Command {
         this.description = description;
     }
 
-    public String getSide() {
-        return side;
-    }
-
-    public String getCommand() {
-        return command;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
     public static Command getCommand(String command) {
         Command[] commands = Command.values();
         for (Command value : commands) {
@@ -107,6 +95,18 @@ public enum Command {
             if (command.functionality.equals("file"))
                 out.add(command);
         return out.toArray(new Command[out.size()]);
+    }
+
+    public String getSide() {
+        return side;
+    }
+
+    public String getCommand() {
+        return command;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
 }

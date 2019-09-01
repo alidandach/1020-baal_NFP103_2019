@@ -22,6 +22,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.regex.Matcher;
 
 public class Client implements Comparable<Client> {
+    private final static Logger logger = LogManager.getLogger(Client.class);
     private static int counter = 1;
     private int id;
     private byte[] secretKey;
@@ -30,8 +31,6 @@ public class Client implements Comparable<Client> {
     private volatile boolean connected;
     private volatile boolean disconnectFromKeyboard;
     private BlockingQueue<String> bridge;
-
-    private final static Logger logger = LogManager.getLogger(Client.class);
 
     Client(Server s, Socket socket, byte[] key) {
         id = counter++;
@@ -218,7 +217,7 @@ public class Client implements Comparable<Client> {
                                         if (partnerId != id) {
                                             Client c = server.getClientById(partnerId);
                                             if (c != null) {
-                                                c.send(Command.SEND_FILE.getCommand() + " " + flags.File.DATA_SEPARATOR.getValue() + this.getHostName() + flags.File.DATA_SEPARATOR.getValue() + this.id + flags.File.DATA_SEPARATOR.getValue() + file[1] + flags.File.DATA_SEPARATOR.getValue() + file[2]);
+                                                c.send(Command.SEND_FILE.getCommand() + " " + flags.File.DATA_SEPARATOR.getValue() + this.getAddress() + flags.File.DATA_SEPARATOR.getValue() + this.id + flags.File.DATA_SEPARATOR.getValue() + file[1] + flags.File.DATA_SEPARATOR.getValue() + file[2]);
                                                 bridge.put("server say:file sent successfully");
                                             } else
                                                 bridge.put("server say:client not found");
@@ -253,6 +252,7 @@ public class Client implements Comparable<Client> {
                 }
             } catch (IOException | InterruptedException e) {
                 Interrupt();
+                server.removeClient(this, false);
                 System.out.println("\nThere is a user left");
                 startPrefix();
             } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException ignored) {
@@ -310,7 +310,16 @@ public class Client implements Comparable<Client> {
      * @return String indicate the host name of user
      */
     String getHostName() {
-        return socket.getLocalAddress().getHostName();
+        return socket.getInetAddress().getHostName();
+    }
+
+    /**
+     *  method to return address of current user
+     *
+     * @return String indicate the address of user
+     */
+    String getAddress(){
+        return socket.getInetAddress().getHostAddress();
     }
 
     /**
@@ -354,7 +363,7 @@ public class Client implements Comparable<Client> {
 
 
     public String toString() {
-        return String.format("%-15s%-35s%-35s%-15s", id, getHostName(), socket.getLocalAddress().getHostAddress(), socket.getPort());
+        return String.format("%-15s%-35s%-35s%-15s", id, getHostName(),getAddress() , socket.getPort());
     }
 
     @Override

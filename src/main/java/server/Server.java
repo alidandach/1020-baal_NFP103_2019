@@ -152,6 +152,10 @@ public class Server {
             c.disconnectFromKeyboard();
         c.disconnect();
         clients.remove(c);
+
+        for (Group group : groups)
+            group.removeClient(c);
+
         broadcast("(pc" + c.getId() + ")" + c.getHostName() + " back offline.");
     }
 
@@ -372,7 +376,6 @@ public class Server {
      * method used to check if group exist before add new group
      *
      * @param name String name of group
-     *
      * @return true if exist same name
      */
     boolean containsGroup(String name) {

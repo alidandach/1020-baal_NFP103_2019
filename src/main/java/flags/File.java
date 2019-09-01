@@ -1,10 +1,10 @@
 package flags;
 
 public enum File {
-    DATA_SEPARATOR(0xff,"data separator for file data");
+    DATA_SEPARATOR(0xff, "data separator for file data");
 
+    private String description;
     private int value;
-    String description;
 
     File(int hex, String des) {
         value = hex;

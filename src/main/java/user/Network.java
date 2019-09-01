@@ -19,12 +19,12 @@ import java.util.Base64;
 import java.util.regex.Matcher;
 
 class Network {
+    private final static Logger logger = LogManager.getLogger(Network.class);
     private User user;
     private volatile boolean connected;
     private volatile boolean first;
     private volatile boolean disconnectFromKeyboard;
     private String prefix;
-    private final static Logger logger = LogManager.getLogger(Network.class);
 
     Network(User u) {
         user = u;
@@ -147,8 +147,8 @@ class Network {
                     //clear response
                     response.setLength(0);
                 }
-            } catch (IOException | InterruptedException | NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | BadPaddingException | IllegalBlockSizeException | InvalidAlgorithmParameterException e) {
-                e.printStackTrace();
+            } catch (Throwable ignored) {
+
             } finally {
                 try {
                     if (first)

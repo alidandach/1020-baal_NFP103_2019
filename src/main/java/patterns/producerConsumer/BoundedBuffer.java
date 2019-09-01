@@ -33,7 +33,7 @@ public class BoundedBuffer {
                 wait();
 
             //to retrieve the first job in the list
-            message= list.removeFirst();
+            message = list.removeFirst();
 
             // Wake up producer thread
             notify();
